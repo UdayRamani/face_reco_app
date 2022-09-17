@@ -43,27 +43,36 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() {
       visibilityB = true;
     });
+    // String username = 'test';
+    // String password = '123£';
+    String basicAuth =
+        'Basic ' + base64.encode(utf8.encode('$username:$password'));
     var url = Api.login;
-    var response = await http.post(Uri.parse(url),
-        body: jsonEncode({'username': username, 'password': password}),
-        headers: <String, String>{
+    print(url);
+    var response = await http.get(Uri.parse(url),
+        // body: jsonEncode({'username': username, 'password': password}),
+        headers: {
           'Content-Type': 'application/json',
+          'Authorization': basicAuth
         });
     // var requestRes;
+
+    print(response.body);
+
     if (response.statusCode == 200) {
       setState(() {
         visibilityB = false;
       });
       var jsonMap = json.decode(response.body);
-
       SharedPreferences pref = await SharedPreferences.getInstance();
       pref.setBool("loginScreen", true);
-      pref.setString("username", jsonMap["username"].toString());
-      pref.setString("email", jsonMap["email"].toString());
-      pref.setString("user_id", jsonMap["id"].toString());
-      pref.setString("token", jsonMap["api_token"].toString());
+      pref.setString("username", username);
+      pref.setString("password", password);
+      // pref.setString("username", jsonMap["username"].toString());
+      // pref.setString("email", jsonMap["email"].toString());
+      // pref.setString("user_id", jsonMap["id"].toString());
+      // pref.setString("token", jsonMap["api_token"].toString());
       Navigator.pushNamedAndRemoveUntil(context, "/home", (route) => false);
-
       setState(() {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -93,171 +102,170 @@ class _LoginScreenState extends State<LoginScreen> {
     // final _controller = TextEditingController(text: "hlw kaushal");
 
     return Scaffold(
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Container(
-            color: Colors.white,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Container(
+      body: Container(
+        color: HexColor("#EDF4F8"),
+        child: Container(
+          color: HexColor("#EDF4F8"),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(
+                child: Container(
                   margin: const EdgeInsets.fromLTRB(20, 120, 20, 20),
-                  height: MediaQuery.of(context).size.height / 8,
-                  child: Image.asset("assets/logo.png"),
+                  height: MediaQuery.of(context).size.height / 2,
+                  width: double.infinity,
+                  child: Image.asset("assets/logingif.gif"),
                 ),
-                const SizedBox(
-                  height: 70,
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 60),
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      children: [
-                        Container(
-                          margin: const EdgeInsets.fromLTRB(20, 0, 20, 0),
-                          child: Row(
-                            children: [
-                              Container(
-                                width: 10,
-                                height: 40,
-                                margin: const EdgeInsets.fromLTRB(0, 0, 10, 0),
-                                decoration: BoxDecoration(
-                                    color: Colors.deepPurple,
-                                    borderRadius: const BorderRadius.all(
-                                        Radius.circular(10))),
-                              ),
-                              Text(
-                                "Login",
-                                style: TextStyle(
-                                    color: HexColor("#000000"), fontSize: 25),
-                              )
-                            ],
-                          ),
+              ),
+              const SizedBox(
+                height: 20,
+              ),
+              Padding(
+                padding: const EdgeInsets.only(top: 60),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    children: [
+                      Container(
+                        margin: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 10,
+                              height: 40,
+                              margin: const EdgeInsets.fromLTRB(0, 0, 10, 0),
+                              decoration: BoxDecoration(
+                                  color: Colors.deepPurple,
+                                  borderRadius: const BorderRadius.all(
+                                      Radius.circular(10))),
+                            ),
+                            Text(
+                              "Login",
+                              style: TextStyle(
+                                  color: HexColor("#000000"), fontSize: 25),
+                            )
+                          ],
                         ),
-                        Visibility(
-                          visible: true,
-                          child: Column(
-                            children: [
-                              Container(
-                                  margin:
-                                      const EdgeInsets.fromLTRB(20, 20, 20, 0),
-                                  child: TextFormField(
-                                    textInputAction: TextInputAction.next,
-                                    style: TextStyle(fontSize: 15),
-                                    validator: (String? value) {
-                                      if (value!.isEmpty) {
-                                        return 'User Name is Required';
-                                      } else {
-                                        setState(() {
-                                          username = value.toString();
-                                        });
-                                      }
-                                    },
-                                    cursorColor: Colors.black,
-                                    keyboardType: TextInputType.emailAddress,
-                                    decoration: InputDecoration(
-                                        fillColor: Colors.blue,
-                                        focusColor: Colors.blueAccent,
-                                        hoverColor: Colors.blueAccent,
-                                        border: OutlineInputBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(10),
-                                          borderSide: const BorderSide(
-                                              color: Colors.blueAccent,
-                                              width: 2),
-                                        ),
-                                        contentPadding:
-                                            EdgeInsets.fromLTRB(10, 0, 10, 0),
-                                        hintStyle: TextStyle(fontSize: 12),
-                                        hintText: "User Name"),
-                                  )),
-                              Container(
+                      ),
+                      Visibility(
+                        visible: true,
+                        child: Column(
+                          children: [
+                            Container(
                                 margin:
                                     const EdgeInsets.fromLTRB(20, 20, 20, 0),
                                 child: TextFormField(
+                                  textInputAction: TextInputAction.next,
+                                  style: TextStyle(fontSize: 15),
                                   validator: (String? value) {
                                     if (value!.isEmpty) {
-                                      return 'Password is Required';
+                                      return 'User Name is Required';
                                     } else {
                                       setState(() {
-                                        password = value.toString();
+                                        username = value.toString();
                                       });
                                     }
                                   },
-                                  keyboardType: TextInputType.visiblePassword,
                                   cursorColor: Colors.black,
-                                  obscureText: _obscured,
-                                  textInputAction: TextInputAction.done,
-                                  style: TextStyle(fontSize: 15),
+                                  keyboardType: TextInputType.emailAddress,
                                   decoration: InputDecoration(
-                                    focusColor: Colors.blueAccent,
-                                    hoverColor: Colors.blueAccent,
-                                    contentPadding:
-                                        EdgeInsets.fromLTRB(10, 0, 10, 0),
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(10),
-                                      borderSide: const BorderSide(
-                                          color: Colors.blueAccent,
-                                          width: 2), // Apply corner radius
-                                    ),
-                                    hintText: "Password",
-                                    // filled: true,
-                                    hintStyle: TextStyle(fontSize: 12),
-                                    isDense: true,
-
-                                    suffixIcon: GestureDetector(
-                                      onTap: _toggleObscured,
-                                      child: Icon(
-                                        _obscured
-                                            ? Icons.visibility_off_rounded
-                                            : Icons.visibility_rounded,
-                                        size: 20,
-                                        color: HexColor("#000000"),
+                                      fillColor: Colors.blue,
+                                      focusColor: Colors.blueAccent,
+                                      hoverColor: Colors.blueAccent,
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                        borderSide: const BorderSide(
+                                            color: Colors.blueAccent, width: 2),
                                       ),
+                                      contentPadding:
+                                          EdgeInsets.fromLTRB(10, 0, 10, 0),
+                                      hintStyle: TextStyle(fontSize: 12),
+                                      hintText: "User Name"),
+                                )),
+                            Container(
+                              margin: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+                              child: TextFormField(
+                                validator: (String? value) {
+                                  if (value!.isEmpty) {
+                                    return 'Password is Required';
+                                  } else {
+                                    setState(() {
+                                      password = value.toString();
+                                    });
+                                  }
+                                },
+                                keyboardType: TextInputType.visiblePassword,
+                                cursorColor: Colors.black,
+                                obscureText: _obscured,
+                                textInputAction: TextInputAction.done,
+                                style: TextStyle(fontSize: 15),
+                                decoration: InputDecoration(
+                                  focusColor: Colors.blueAccent,
+                                  hoverColor: Colors.blueAccent,
+                                  contentPadding:
+                                      EdgeInsets.fromLTRB(10, 0, 10, 0),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                    borderSide: const BorderSide(
+                                        color: Colors.blueAccent,
+                                        width: 2), // Apply corner radius
+                                  ),
+                                  hintText: "Password",
+                                  // filled: true,
+                                  hintStyle: TextStyle(fontSize: 12),
+                                  isDense: true,
+
+                                  suffixIcon: GestureDetector(
+                                    onTap: _toggleObscured,
+                                    child: Icon(
+                                      _obscured
+                                          ? Icons.visibility_off_rounded
+                                          : Icons.visibility_rounded,
+                                      size: 20,
+                                      color: HexColor("#000000"),
                                     ),
                                   ),
                                 ),
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
-                        Container(
-                            height: 45,
-                            width: double.infinity,
-                            margin: const EdgeInsets.fromLTRB(20, 20, 20, 20),
-                            padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
-                            decoration: BoxDecoration(
-                                color: Colors.deepPurple,
-                                border: Border.all(
-                                    width: 1, color: HexColor("#000598")),
-                                borderRadius: const BorderRadius.all(
-                                    Radius.circular(10))),
-                            child: FlatButton(
-                              onPressed: visibilityB
-                                  ? () {}
-                                  : () {
-                                      if (_formKey.currentState!.validate()) {
-                                        login(username, password);
-                                      }
-                                    },
-                              child: visibilityB
-                                  ? const CircularProgressIndicator(
-                                      color: Colors.white,
-                                    )
-                                  : const Text(
-                                      "Submit",
-                                      style: TextStyle(
-                                          color: Colors.white, fontSize: 15),
-                                    ),
-                            )),
-                      ],
-                    ),
+                      ),
+                      Container(
+                          height: 45,
+                          width: double.infinity,
+                          margin: const EdgeInsets.fromLTRB(20, 20, 20, 20),
+                          padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+                          decoration: BoxDecoration(
+                              color: Colors.deepPurple,
+                              border: Border.all(
+                                  width: 1, color: HexColor("#000598")),
+                              borderRadius:
+                                  const BorderRadius.all(Radius.circular(10))),
+                          child: FlatButton(
+                            onPressed: visibilityB
+                                ? () {}
+                                : () {
+                                    if (_formKey.currentState!.validate()) {
+                                      login(username, password);
+                                    }
+                                  },
+                            child: visibilityB
+                                ? const CircularProgressIndicator(
+                                    color: Colors.white,
+                                  )
+                                : const Text(
+                                    "Submit",
+                                    style: TextStyle(
+                                        color: Colors.white, fontSize: 15),
+                                  ),
+                          )),
+                    ],
                   ),
-                )
-              ],
-            ),
+                ),
+              )
+            ],
           ),
         ),
       ),

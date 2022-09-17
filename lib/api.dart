@@ -4,9 +4,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class Api {
   static var baseUrl =
-      "https://faceid.eurosoft.pro/api/v1/";
+      "https://kzo.qaznaonline.kz/kzo/hs/DDO/";
   static var client = http.Client();
-  static var login = '${baseUrl}auth/login';
+  static var login = '${baseUrl}auth';
 
   Future<http.MultipartRequest> request(
       String url, String method, bool urlSlug) async {
