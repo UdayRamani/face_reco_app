@@ -1,13 +1,12 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
-import 'package:face_detaction_app/students_list.dart';
+import 'package:face_detaction_app/Screens/students_list.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import "package:http/http.dart" as http;
 import 'package:shimmer/shimmer.dart';
 
-import '../api.dart';
+import '../Config/api.dart';
 
 class ClassRooms extends StatefulWidget {
   const ClassRooms({Key? key}) : super(key: key);
@@ -25,8 +24,9 @@ class _ClassRoomsState extends State<ClassRooms> {
   @override
   void initState() {
     // TODO: implement initState
-    getDataa();
+    // GetData("050140008433", "8759");
     super.initState();
+    getDataa();
   }
 
   void getDataa() async {
@@ -37,14 +37,15 @@ class _ClassRoomsState extends State<ClassRooms> {
   }
 
   void GetData(username, password) async {
+    print(username);
+    print(password);
     String basicAuth =
-        'Basic ' + base64.encode(utf8.encode('$username:$password'));
-    var _url = Api.login;
-    Dio dio = new Dio();
-    dio.options.headers['Authorization'] = '$basicAuth';
-    var response = await dio.get(_url);
+        'Basic ${base64.encode(utf8.encode('$username:$password'))}';
     var url = Api.login;
     print(url);
+    Dio dio = Dio();
+    dio.options.headers['Authorization'] = basicAuth;
+    var response = await dio.get(url);
 
     if (response.statusCode == 200) {
       // var jsonMap = json.decode(response.data);
@@ -150,11 +151,11 @@ class _ClassRoomsState extends State<ClassRooms> {
                                         (data[index]["child_mass"] as List)
                                             .length
                                             .toString(),
-                                        style: TextStyle(
+                                        style: const TextStyle(
                                             color: Colors.white, fontSize: 10),
                                       ),
                                     ),
-                                    SizedBox(
+                                    const SizedBox(
                                       width: 5,
                                     ),
                                   ],

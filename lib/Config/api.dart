@@ -6,6 +6,7 @@ class Api {
   static var baseUrl =
       "https://kzo.qaznaonline.kz/kzo/hs/DDO/";
   static var client = http.Client();
+  static var mRUrl = "http://157.245.107.107/";
   static var login = '${baseUrl}auth';
 
   Future<http.MultipartRequest> request(

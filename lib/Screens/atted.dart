@@ -146,8 +146,21 @@
 // //     return Container();
 // //   }
 // // }
+import 'dart:convert';
 
+import 'package:dio/dio.dart';
+import 'package:face_detaction_app/Screens/student_liist_for%20_atten.dart';
+import 'package:face_detaction_app/Screens/students_list.dart';
+import 'package:flutter/material.dart';
+import 'package:localstorage/localstorage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import "package:http/http.dart" as http;
+import 'package:shimmer/shimmer.dart';
+
+import '../Config/api.dart';
 import 'package:flutter/cupertino.dart';
+
+import 'home.dart';
 
 class Atted extends StatefulWidget {
   const Atted({Key? key}) : super(key: key);
@@ -157,9 +170,60 @@ class Atted extends StatefulWidget {
 }
 
 class _AttedState extends State<Atted> {
+  var data = [
+    // {"title": "Class 12", "sub_title": "Chemistry 1ST", "suc": "12", "ap": "3"},
+    // {"title": "Class 11", "sub_title": "Chemistry 2ND", "suc": "22", "ap": "12"}
+  ];
+  final LocalStorage storage = LocalStorage('todo_app');
+  TodoList list = TodoList();
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    getData();
+    super.initState();
+  }
+
+  void getData() {
+    var data = storage.getItem('todos');
+    print(data);
+
+  }
   @override
   Widget build(BuildContext context) {
-    return Container();
-
+    return Scaffold(
+        appBar: AppBar(
+          title: const Text("Classrooms"),
+          centerTitle: true,
+        ),
+        body: Container(
+          child: list.items.isNotEmpty
+              ? ListView.builder(
+                  itemBuilder: (context, index) => const Text("as"),
+                  itemCount: list.items.length)
+              : ListView.builder(
+                  itemBuilder: (context, index) {
+                    return Shimmer.fromColors(
+                        baseColor: Colors.grey.shade400,
+                        highlightColor: Colors.black12,
+                        child: Container(
+                          margin: EdgeInsets.fromLTRB(10, 10, 10, 0),
+                          padding: EdgeInsets.fromLTRB(0, 10, 0, 5),
+                          height: 40,
+                          decoration: BoxDecoration(
+                              color: Colors.white,
+                              boxShadow: [
+                                BoxShadow(
+                                    blurRadius: 0.2,
+                                    offset: Offset.fromDirection(1),
+                                    color: Colors.black12,
+                                    spreadRadius: 1)
+                              ],
+                              borderRadius: BorderRadius.circular(5)),
+                          width: double.infinity,
+                        ));
+                  },
+                  itemCount: 20),
+        ));
   }
 }

@@ -1,12 +1,8 @@
 import 'dart:io';
-
-import 'package:face_detaction_app/login.dart';
+import 'package:face_detaction_app/Screens/login.dart';
 import 'package:flutter/material.dart';
-import 'package:hexcolor/hexcolor.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'home.dart';
-// @dart=2.9
-
+import '../Screens/home.dart';
 class MyHttpOverrides extends HttpOverrides {
   @override
   HttpClient createHttpClient(SecurityContext? context) {
@@ -17,9 +13,8 @@ class MyHttpOverrides extends HttpOverrides {
 }
 
 void main() {
-  HttpOverrides.global = new MyHttpOverrides();
-
-  runApp(const MyApp());
+  HttpOverrides.global = MyHttpOverrides();
+  runApp(MyApp());
 }
 
 class MyApp extends StatefulWidget {
@@ -50,7 +45,6 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
-      supportedLocales: [Locale('en', ''), Locale('ru', ''), Locale('hi', '')],
       theme: ThemeData(
           primarySwatch: Colors.deepPurple,
           primaryColor: Colors.deepPurple,
@@ -62,7 +56,8 @@ class _MyAppState extends State<MyApp> {
         "/home": (context) => const Home(),
         "/login": (context) => const LoginScreen(),
       },
-      home: checkLogin ? Home() : LoginScreen(),
+      // home: Home(),
+      home: checkLogin ? const Home() : const LoginScreen(),
     );
   }
 }
