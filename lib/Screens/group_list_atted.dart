@@ -73,6 +73,7 @@ class _GroupListAttendState extends State<GroupListAttend> {
                             context,
                             MaterialPageRoute(
                               builder: (BuildContext context) => TodayAtted(
+                                students:data[0]["group_mass"][index]["child_mass"],
                                 group_ID:
                                     data[0]["org_ID"].toString().toUpperCase(),
                                 org_ID: data[0]["group_mass"][index]["group_ID"]

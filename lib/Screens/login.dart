@@ -33,14 +33,16 @@ class _LoginScreenState extends State<LoginScreen> {
   void _toggleObscured() {
     setState(() {
       _obscured = !_obscured;
-      if (textFieldFocusNode.hasPrimaryFocus)
-        return; // If focus is on text field, dont unfocus
+      if (textFieldFocusNode.hasPrimaryFocus) {
+        return;
+      } // If focus is on text field, dont unfocus
       textFieldFocusNode.canRequestFocus =
           false; // Prevents focus if tap on eye
     });
   }
 
   void login(username, password,context) async {
+
     setState(() {
       visibilityB = true;
     });

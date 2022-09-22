@@ -45,6 +45,8 @@ dependencies:
   google_fonts: ^3.0.1
   dio: ^4.0.6
   localstorage: ^4.0.0+1
+  ota_update: ^4.0.1
+
 
 dev_dependencies:
   flutter_test:

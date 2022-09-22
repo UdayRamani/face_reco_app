@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import "package:http/http.dart" as http;
 import 'package:image_picker/image_picker.dart';
@@ -14,12 +15,14 @@ class TodayAtted extends StatefulWidget {
   final String title;
   final String org_ID;
   final String group_ID;
+  final List students;
 
   const TodayAtted(
       {Key? key,
       required this.title,
       required this.org_ID,
-      required this.group_ID})
+      required this.group_ID,
+      required this.students})
       : super(key: key);
 
   @override
@@ -79,9 +82,6 @@ class _TodayAttedState extends State<TodayAtted> {
       setState(() {
         checkLoaderForAttend = false;
       });
-      var Data = [];
-      Data.addAll(jsonMap["St_ids"]);
-      // print(Data);
       _save(jsonMap["St_ids"] as List);
       setState(() {});
 
@@ -162,6 +162,8 @@ class _TodayAttedState extends State<TodayAtted> {
 
   final TodoList list = new TodoList();
   var Datass = [];
+  var finaldisplayDataWithName = [];
+  var displayData = [];
   final LocalStorage storage = new LocalStorage('todo_app');
   bool initialized = false;
   TextEditingController controller = new TextEditingController();
@@ -212,14 +214,18 @@ class _TodayAttedState extends State<TodayAtted> {
   }
 
   void _save(List data) {
-    print(data);
-    // final item = TodoItem(title: title, done: false);
-    // list.items.addAll(data);
     storage.setItem(widget.title, data);
+    displayData.addAll(widget.students);
     Datass.addAll(data);
+    for (var d in displayData) {
+      for (var e in data) {
+        if (e.toString() == d["child_iin"].toString()) {
+          finaldisplayDataWithName.add(d);
+        }
+      }
+    }
+    print(finaldisplayDataWithName);
     setState(() {});
-    // data.map((e) => _addItem(e.toString()));
-    // controller.clear();
   }
 
   _clearStorage() async {
@@ -263,6 +269,7 @@ class _TodayAttedState extends State<TodayAtted> {
         onPressed: () {
           Navigator.pop(context);
           Datass.clear();
+          finaldisplayDataWithName.clear();
           setState(() {});
         },
       );
@@ -296,7 +303,16 @@ class _TodayAttedState extends State<TodayAtted> {
         actions: [
           GestureDetector(
               onTap: () {
-                Attendnce();
+                if (finaldisplayDataWithName.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        backgroundColor: Colors.red,
+                        content: Text(
+                            "Warning! Without Add Students You can not submit Attendance")),
+                  );
+                } else {
+                  Attendnce();
+                }
               },
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
@@ -374,7 +390,7 @@ class _TodayAttedState extends State<TodayAtted> {
               //   initialized = true;
               // }
 
-              List<Widget> widgets = Datass.map((item) {
+              List<Widget> widgets = finaldisplayDataWithName.map((item) {
                 return Container(
                     margin: EdgeInsets.fromLTRB(5, 5, 5, 0),
                     padding: EdgeInsets.fromLTRB(10, 10, 0, 0),
@@ -391,7 +407,7 @@ class _TodayAttedState extends State<TodayAtted> {
                               spreadRadius: 1)
                         ],
                         borderRadius: BorderRadius.circular(5)),
-                    child: Text(item.toString()));
+                    child: Text(item["child_name"].toString()));
               }).toList();
 
               return Column(
