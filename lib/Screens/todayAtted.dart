@@ -247,7 +247,6 @@ class _TodayAttedState extends State<TodayAtted> {
       'Authorization': basicAuth,
       'Content-Type': 'application/json'
     };
-    print(headers);
     var request = http.Request(
         'POST', Uri.parse('https://kzo.qaznaonline.kz/kzo/hs/DDO/visited'));
     request.body = json.encode([
@@ -259,9 +258,7 @@ class _TodayAttedState extends State<TodayAtted> {
       }
     ]);
     request.headers.addAll(headers);
-
     http.StreamedResponse response = await request.send();
-    print(response.statusCode);
     if (response.statusCode == 200) {
       _onLoading(false);
       Widget okButton = TextButton(
@@ -290,8 +287,6 @@ class _TodayAttedState extends State<TodayAtted> {
       );
     } else {
       _onLoading(false);
-
-      print(response.reasonPhrase);
     }
   }
 
@@ -314,8 +309,8 @@ class _TodayAttedState extends State<TodayAtted> {
                   Attendnce();
                 }
               },
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
+              child: const Padding(
+                padding: EdgeInsets.all(8.0),
                 child: Icon(Icons.save),
               ))
         ],
