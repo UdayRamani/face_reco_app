@@ -6,7 +6,7 @@ import "package:http/http.dart" as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:shimmer/shimmer.dart';
 
-import '../Config/api.dart';
+import '../../Config/api.dart';
 
 class StudentList extends StatefulWidget {
   final List Data;
@@ -44,9 +44,8 @@ class _StudentListState extends State<StudentList> {
       source: source,
       maxWidth: width,
       maxHeight: height,
-      // imageQuality: quality,
+      imageQuality: 50,
     );
-
     var url = Uri.parse("${Api.mRUrl}registerapi");
     print(url);
     AlertDialog alert1 = const AlertDialog(
@@ -189,7 +188,8 @@ class _StudentListState extends State<StudentList> {
                                     "http://157.245.107.107/static/students/${widget.Data[index]["child_iin"]}.png",
                                   ),
                                   placeholder: const NetworkImage(
-                                      "https://i.gifer.com/origin/d3/d3f472b06590a25cb4372ff289d81711_w200.gif"),
+                                      "https://i.gifer.com/origin/d3/d3f472b06590a25cb4372ff289d81711_w200.gif",
+                                  ),
                                   imageErrorBuilder:
                                       (context, error, stackTrace) {
                                     return GestureDetector(
@@ -203,49 +203,13 @@ class _StudentListState extends State<StudentList> {
                                       },
                                       child: Image.network(
                                         'https://img.icons8.com/ios-glyphs/480/camera--v1.png',
+                                        filterQuality: FilterQuality.medium,
                                       ),
                                     );
                                   },
                                   fit: BoxFit.fitWidth,
                                 )),
-                            // Row(
-                            //   children: [
-                            //     GestureDetector(
-                            //       onTap: () {
-                            //         print("sdds");
-                            //         _onImageButtonPressed(
-                            //             ImageSource.camera,
-                            //             widget.Data[index]["child_iin"]
-                            //                 .toString(),
-                            //             context: context,
-                            //             imageQuality: 85);
-                            //       },
-                            //       child: Container(
-                            //           width: 50,
-                            //           height: 30,
-                            //           margin: EdgeInsets.fromLTRB(0, 0, 10, 0),
-                            //           decoration: BoxDecoration(
-                            //               color: Colors.white,
-                            //               borderRadius:
-                            //                   BorderRadius.circular(10)),
-                            //           // child: Icon(Icons.camera_alt)
-                            //           child: Icon(Icons.camera_alt)),
-                            //     ),
-                            //     GestureDetector(
-                            //       onTap: () {
-                            //         print("sdds");
-                            //         Navigator.push(context,
-                            //             MaterialPageRoute(builder: (_) {
-                            //           return CustomePhotoView(
-                            //             ImageUrl:
-                            //                 "http://157.245.107.107/static/students/${widget.Data[index]["child_iin"]}.png",
-                            //           );
-                            //         }));
-                            //       },
-                            //       child:
-                            //     ),
-                            //   ],
-                            // ),
+
                           ],
                         ),
                       ),

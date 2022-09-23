@@ -1,12 +1,12 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
-import 'package:face_detaction_app/Screens/students_list.dart';
+import 'package:face_detaction_app/Screens/classroom/students_list.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
 
-import '../Config/api.dart';
+import '../../Config/api.dart';
 
 class ClassRooms extends StatefulWidget {
   const ClassRooms({Key? key}) : super(key: key);

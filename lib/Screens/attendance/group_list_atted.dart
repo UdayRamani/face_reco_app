@@ -1,12 +1,12 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
-import 'package:face_detaction_app/Screens/todayAtted.dart';
+import 'package:face_detaction_app/Screens/attendance/todayAtted.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
 
-import '../Config/api.dart';
+import '../../Config/api.dart';
 
 class GroupListAttend extends StatefulWidget {
   const GroupListAttend({Key? key}) : super(key: key);

@@ -8,8 +8,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:localstorage/localstorage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../Config/api.dart';
-import 'home.dart';
+import '../../Config/api.dart';
+import '../home.dart';
 
 class TodayAtted extends StatefulWidget {
   final String title;
@@ -58,7 +58,7 @@ class _TodayAttedState extends State<TodayAtted> {
       source: source,
       maxWidth: width,
       maxHeight: height,
-      // imageQuality: quality,
+      imageQuality: 50,
     );
     _onLoading(true);
     var url = Uri.parse("${Api.mRUrl}attendanceapi");
