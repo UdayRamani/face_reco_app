@@ -7,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../../Config/api.dart';
+import '../../l10n/language_constant.dart';
 
 class StudentList extends StatefulWidget {
   final List Data;
@@ -48,17 +49,20 @@ class _StudentListState extends State<StudentList> {
     );
     var url = Uri.parse("${Api.mRUrl}registerapi");
     print(url);
-    AlertDialog alert1 = const AlertDialog(
-      title: Text("Waiting.....", style: TextStyle(color: Colors.green)),
-      content: Text("We are registering Student."),
-    );
-    showDialog(
-      barrierDismissible: false,
-      context: context,
-      builder: (BuildContext context) {
-        return alert1;
-      },
-    );
+    if (pickedFile!.path.isNotEmpty) {
+      AlertDialog alert1 = AlertDialog(
+        title: Text(translation(context).loading,
+            style: TextStyle(color: Colors.green)),
+        content: Text(translation(context).child_registering),
+      );
+      showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder: (BuildContext context) {
+          return alert1;
+        },
+      );
+    }
     var request = http.MultipartRequest("POST", url);
     request.fields['student'] = name.toString();
     if (File(pickedFile!.path).exists() != null) {
@@ -76,7 +80,7 @@ class _StudentListState extends State<StudentList> {
     if (jsonMap["Status"] == 200) {
       Navigator.pop(context);
       Widget okButton = TextButton(
-        child: const Text("OKay"),
+        child: Text(translation(context).okay),
         onPressed: () {
           Navigator.pushReplacement(
               context,
@@ -86,13 +90,14 @@ class _StudentListState extends State<StudentList> {
       );
 
       AlertDialog alert = AlertDialog(
-        title: const Text("Student Registered",
+        title: Text(translation(context).registration_successfully,
             style: TextStyle(color: Colors.green)),
-        content: const Text("Click Okay to Back "),
+        content: Text(translation(context).press_ok_to_con),
         actions: [
           okButton,
         ],
       );
+
       showDialog(
         barrierDismissible: false,
         context: context,
@@ -113,7 +118,7 @@ class _StudentListState extends State<StudentList> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: const Text("Students"),
+          title: Text(translation(context).children),
           centerTitle: true,
         ),
         body: Container(
@@ -123,13 +128,13 @@ class _StudentListState extends State<StudentList> {
                   itemBuilder: (context, index) {
                     int ins = index + 1;
                     return Container(
-                      margin: EdgeInsets.fromLTRB(10, 10, 10, 0),
+                      margin: EdgeInsets.fromLTRB(10, 20, 20, 0),
                       padding: EdgeInsets.fromLTRB(0, 10, 0, 5),
                       decoration: BoxDecoration(
                           // color: data[index]["ap"].toString() == "P"
                           //     ? Colors.green[200]
                           //     : Colors.red[200],
-                          color: Colors.red[200],
+                          color: Colors.white,
                           boxShadow: [
                             BoxShadow(
                                 blurRadius: 0.2,
@@ -139,27 +144,63 @@ class _StudentListState extends State<StudentList> {
                           ],
                           borderRadius: BorderRadius.circular(5)),
                       child: Container(
-                        padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
+                        padding: EdgeInsets.fromLTRB(10, 15, 10, 15),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Expanded(
-                              child: Row(
-                                children: [
-                                  SizedBox(
-                                    width: 20,
-                                  ),
-                                  Container(
-                                    width: 30,
-                                    child: Text(
-                                      ins.toString(),
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.w500),
+                            Container(
+                                width: 50,
+                                height: 50,
+                                margin: EdgeInsets.fromLTRB(0, 0, 25, 0),
+                                decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(10)),
+                                // child: Icon(Icons.camera_alt)
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(8.0),
+                                  child: FadeInImage(
+                                    image: NetworkImage(
+                                      "http://157.245.107.107/static/students/${widget.Data[index]["child_iin"]}.png",
                                     ),
+                                    placeholder: const NetworkImage(
+                                      "https://i.gifer.com/origin/d3/d3f472b06590a25cb4372ff289d81711_w200.gif",
+                                    ),
+                                    imageErrorBuilder:
+                                        (context, error, stackTrace) {
+                                      return GestureDetector(
+                                        onTap: () {
+                                          _onImageButtonPressed(
+                                              ImageSource.camera,
+                                              widget.Data[index]["child_iin"]
+                                                  .toString(),
+                                              context: context,
+                                              imageQuality: 85);
+                                        },
+                                        child: Container(
+                                          width: 20,
+                                          height: 20,
+                                          padding: EdgeInsets.all(5),
+                                          decoration: BoxDecoration(
+                                              color: Colors.white,
+                                              border: Border.all(
+                                                  color: Colors.black),
+                                              borderRadius:
+                                                  BorderRadius.circular(50)),
+                                          child: Image.network(
+                                            'https://img.icons8.com/ios-glyphs/480/camera--v1.png',
+                                            filterQuality: FilterQuality.medium,
+                                            width: 20,
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                    fit: BoxFit.fitWidth,
                                   ),
-                                  SizedBox(
-                                    width: 20,
-                                  ),
+                                )),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
                                   Container(
                                     child: Text(
                                       widget.Data[index]["child_name"]
@@ -169,47 +210,22 @@ class _StudentListState extends State<StudentList> {
                                       style: TextStyle(
                                           color: Colors.black,
                                           fontWeight: FontWeight.w500,
-                                          fontSize: 10),
+                                          fontSize: 13),
+                                    ),
+                                  ),
+                                  Container(
+                                    margin: EdgeInsets.fromLTRB(0, 6, 0, 0),
+                                    child: Text(
+                                      widget.Data[index]["child_iin"],
+                                      style: TextStyle(
+                                          color: Colors.grey,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w500),
                                     ),
                                   ),
                                 ],
                               ),
                             ),
-                            Container(
-                                width: 50,
-                                height: 30,
-                                margin: EdgeInsets.fromLTRB(0, 0, 10, 0),
-                                decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(10)),
-                                // child: Icon(Icons.camera_alt)
-                                child: FadeInImage(
-                                  image: NetworkImage(
-                                    "http://157.245.107.107/static/students/${widget.Data[index]["child_iin"]}.png",
-                                  ),
-                                  placeholder: const NetworkImage(
-                                      "https://i.gifer.com/origin/d3/d3f472b06590a25cb4372ff289d81711_w200.gif",
-                                  ),
-                                  imageErrorBuilder:
-                                      (context, error, stackTrace) {
-                                    return GestureDetector(
-                                      onTap: () {
-                                        _onImageButtonPressed(
-                                            ImageSource.camera,
-                                            widget.Data[index]["child_iin"]
-                                                .toString(),
-                                            context: context,
-                                            imageQuality: 85);
-                                      },
-                                      child: Image.network(
-                                        'https://img.icons8.com/ios-glyphs/480/camera--v1.png',
-                                        filterQuality: FilterQuality.medium,
-                                      ),
-                                    );
-                                  },
-                                  fit: BoxFit.fitWidth,
-                                )),
-
                           ],
                         ),
                       ),

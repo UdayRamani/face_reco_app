@@ -9,6 +9,7 @@ import 'package:localstorage/localstorage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../Config/api.dart';
+import '../../l10n/language_constant.dart';
 import '../home.dart';
 
 class TodayAtted extends StatefulWidget {
@@ -58,19 +59,21 @@ class _TodayAttedState extends State<TodayAtted> {
       source: source,
       maxWidth: width,
       maxHeight: height,
-      imageQuality: 50,
+      imageQuality: 20,
     );
+    print(pickedFile!.length());
+
     _onLoading(true);
     var url = Uri.parse("${Api.mRUrl}attendanceapi");
     print(url);
     var request = http.MultipartRequest("POST", url);
-    if (File(pickedFile!.path).exists() != null) {
+    if (File(pickedFile.path).exists() != null) {
       request.files.add(http.MultipartFile(
           'imagefile',
-          pickedFile!.readAsBytes().asStream(),
-          File(pickedFile!.path).lengthSync(),
+          pickedFile.readAsBytes().asStream(),
+          File(pickedFile.path).lengthSync(),
           filename:
-              DateTime.now().toString() + pickedFile!.path.split("/").last));
+              DateTime.now().toString() + pickedFile.path.split("/").last));
     }
     var responses = await request.send();
     var responseBody = await http.Response.fromStream(responses);
@@ -86,14 +89,14 @@ class _TodayAttedState extends State<TodayAtted> {
       setState(() {});
 
       Widget okButton = TextButton(
-        child: const Text("OKay"),
+        child: Text(translation(context).okay),
         onPressed: () {
           Navigator.pop(context);
         },
       );
       Widget okButton1 = TextButton(
-        child: const Text(
-          "New attendance",
+        child: Text(
+          translation(context).new_attendance,
         ),
         onPressed: () {
           _onImageButtonPressed(ImageSource.camera,
@@ -101,9 +104,9 @@ class _TodayAttedState extends State<TodayAtted> {
         },
       );
       AlertDialog alert = AlertDialog(
-        title: const Text("Attendance Submitted",
+        title: Text(translation(context).successfully,
             style: TextStyle(color: Colors.green)),
-        content: const Text("Click Okay to Back "),
+        content: Text(translation(context).we_got_to_know_the_children),
         actions: [
           okButton,
           okButton1,
@@ -122,14 +125,14 @@ class _TodayAttedState extends State<TodayAtted> {
         checkLoaderForAttend = false;
       });
       Widget okButton = TextButton(
-        child: const Text("OKay"),
+        child: Text(translation(context).okay),
         onPressed: () {
           Navigator.pop(context);
         },
       );
       Widget okButton1 = TextButton(
-        child: const Text(
-          "New attendance",
+        child: Text(
+          translation(context).again,
         ),
         onPressed: () {
           _onImageButtonPressed(ImageSource.camera,
@@ -138,9 +141,9 @@ class _TodayAttedState extends State<TodayAtted> {
       );
 
       AlertDialog alert = AlertDialog(
-        title: const Text("Attend Fail", style: TextStyle(color: Colors.red)),
-        content: const Text(
-            "We can't attend this student this is not available to our Record"),
+        title: Text(translation(context).not_recognized,
+            style: TextStyle(color: Colors.red)),
+        content: Text(translation(context).we_can_not_recognize),
         actions: [
           okButton,
           okButton1,
@@ -191,7 +194,7 @@ class _TodayAttedState extends State<TodayAtted> {
                       SizedBox(
                         width: 21,
                       ),
-                      new Text("Loading..."),
+                      new Text(translation(context).loading),
                     ],
                   ),
                 ),
@@ -251,18 +254,19 @@ class _TodayAttedState extends State<TodayAtted> {
         'POST', Uri.parse('https://kzo.qaznaonline.kz/kzo/hs/DDO/visited'));
     request.body = json.encode([
       {
-        "org_ID": 10867,
+        "org_ID": widget.org_ID,
         "group_mass": [
-          {"group_ID": "ява000112", "visited": Datass}
+          {"group_ID": widget.group_ID, "visited": Datass}
         ]
       }
     ]);
+
     request.headers.addAll(headers);
     http.StreamedResponse response = await request.send();
     if (response.statusCode == 200) {
       _onLoading(false);
       Widget okButton = TextButton(
-        child: const Text("OKay"),
+        child: Text(translation(context).okay),
         onPressed: () {
           Navigator.pop(context);
           Datass.clear();
@@ -271,13 +275,14 @@ class _TodayAttedState extends State<TodayAtted> {
         },
       );
       AlertDialog alert = AlertDialog(
-        title: const Text("Attendance Submitted Successfully",
+        title: Text(translation(context).successfully_submitted,
             style: TextStyle(color: Colors.green)),
-        content: const Text("Click Okay to Back "),
+        content: Text(translation(context).okay),
         actions: [
           okButton,
         ],
       );
+
       showDialog(
         barrierDismissible: false,
         context: context,
@@ -299,12 +304,11 @@ class _TodayAttedState extends State<TodayAtted> {
           GestureDetector(
               onTap: () {
                 if (finaldisplayDataWithName.isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                        backgroundColor: Colors.red,
-                        content: Text(
-                            "Warning! Without Add Students You can not submit Attendance")),
-                  );
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      backgroundColor: Colors.red,
+                      content: Text(
+                        translation(context).atten_empty,
+                      )));
                 } else {
                   Attendnce();
                 }

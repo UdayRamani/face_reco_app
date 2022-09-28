@@ -3,10 +3,14 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:face_detaction_app/Screens/attendance/todayAtted.dart';
 import 'package:flutter/material.dart';
+import 'package:hexcolor/hexcolor.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../../Config/api.dart';
+import '../../l10n/language_constant.dart';
+
+
 
 class GroupListAttend extends StatefulWidget {
   const GroupListAttend({Key? key}) : super(key: key);
@@ -61,7 +65,7 @@ class _GroupListAttendState extends State<GroupListAttend> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: const Text("Classrooms"),
+          title: Text(translation(context).class_room),
           centerTitle: true,
         ),
         body: Container(
@@ -101,77 +105,36 @@ class _GroupListAttendState extends State<GroupListAttend> {
                               ],
                               borderRadius: BorderRadius.circular(5)),
                           child: Container(
-                            padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
+                            padding: EdgeInsets.fromLTRB(20, 10, 10, 10),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      data[0]["group_mass"][index]["group_name"]
-                                          .toString()
-                                          .toUpperCase(),
-                                      locale: Locale.fromSubtags(
-                                          languageCode: 'ru'),
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.w500,
-                                          fontSize: 12),
-                                    ),
-                                    Text(
-                                      data[0]["group_mass"][index]["group_name"]
-                                          .toString(),
-                                      style: const TextStyle(
-                                          color: Colors.grey,
-                                          // fontWeight: FontWeight.w300,
-                                          fontSize: 10),
-                                    ),
-                                  ],
+                                Text(
+                                  data[0]["group_mass"][index]["group_name"]
+                                      .toString()
+                                      .toUpperCase(),
+                                  locale:
+                                      Locale.fromSubtags(languageCode: 'ru'),
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 12),
                                 ),
-                                Row(
-                                  children: [
-                                    Container(
-                                      width: 30,
-                                      height: 30,
-                                      alignment: Alignment.center,
-                                      // padding: EdgeInsets.all(5),
-                                      decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(30),
-                                          color: Colors.green),
-                                      child: Text(
-                                        "0",
-                                        style: TextStyle(
-                                            color: Colors.white, fontSize: 10),
-                                      ),
-                                    ),
-                                    SizedBox(
-                                      width: 5,
-                                    ),
-                                    Container(
-                                      width: 30,
-                                      height: 30,
-                                      alignment: Alignment.center,
-
-                                      // padding: EdgeInsets.all(5),
-                                      decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(30),
-                                          color: Colors.redAccent),
-                                      child: Text(
-                                        (data[0]["group_mass"][index]
-                                                ["child_mass"] as List)
-                                            .length
-                                            .toString(),
-                                        style: const TextStyle(
-                                            color: Colors.white, fontSize: 10),
-                                      ),
-                                    ),
-                                    const SizedBox(
-                                      width: 5,
-                                    ),
-                                  ],
-                                )
+                                Container(
+                                  width: 30,
+                                  height: 30,
+                                  alignment: Alignment.center,
+                                  margin: EdgeInsets.fromLTRB(0, 0, 0, 0),
+                                  child: Text(
+                                    (data[0]["group_mass"][index]["child_mass"]
+                                            as List)
+                                        .length
+                                        .toString(),
+                                    style: TextStyle(
+                                        color: HexColor("#2760ff"),
+                                        fontWeight: FontWeight.w800,
+                                        fontSize: 16),
+                                  ),
+                                ),
                               ],
                             ),
                           ),
@@ -186,7 +149,7 @@ class _GroupListAttendState extends State<GroupListAttend> {
                         child: Container(
                           margin: EdgeInsets.fromLTRB(10, 10, 10, 0),
                           padding: EdgeInsets.fromLTRB(0, 10, 0, 5),
-                          height: 40,
+                          height: 70,
                           decoration: BoxDecoration(
                               color: Colors.white,
                               boxShadow: [

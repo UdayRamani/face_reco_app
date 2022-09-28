@@ -3,10 +3,12 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:face_detaction_app/Screens/classroom/students_list.dart';
 import 'package:flutter/material.dart';
+import 'package:hexcolor/hexcolor.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../../Config/api.dart';
+import '../../l10n/language_constant.dart';
 
 class ClassRooms extends StatefulWidget {
   const ClassRooms({Key? key}) : super(key: key);
@@ -61,11 +63,11 @@ class _ClassRoomsState extends State<ClassRooms> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text("Classrooms"),
+          title: Text(translation(context).class_room),
           centerTitle: true,
         ),
         body: Container(
-          child: data.length != 0
+          child: data.isNotEmpty
               ? ListView.builder(
                   itemBuilder: (context, index) => GestureDetector(
                         onTap: () {
@@ -91,75 +93,42 @@ class _ClassRoomsState extends State<ClassRooms> {
                               ],
                               borderRadius: BorderRadius.circular(5)),
                           child: Container(
-                            padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
+                            padding: EdgeInsets.fromLTRB(20, 10, 10, 10),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      data[index]["group_name"]
-                                          .toString()
-                                          .toUpperCase(),
-                                      locale: Locale.fromSubtags(
-                                          languageCode: 'ru'),
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.w500,
-                                          fontSize: 12),
-                                    ),
-                                    Text(
-                                      data[index]["group_name"].toString(),
-                                      style: const TextStyle(
-                                          color: Colors.grey,
-                                          // fontWeight: FontWeight.w300,
-                                          fontSize: 10),
-                                    ),
-                                  ],
+                                Text(
+                                  data[index]["group_name"]
+                                      .toString()
+                                      .toUpperCase(),
+                                  locale:
+                                      Locale.fromSubtags(languageCode: 'ru'),
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 12),
                                 ),
-                                Row(
-                                  children: [
-                                    Container(
-                                      width: 30,
-                                      height: 30,
-                                      alignment: Alignment.center,
-                                      // padding: EdgeInsets.all(5),
-                                      decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(30),
-                                          color: Colors.green),
-                                      child: Text(
-                                        "0",
-                                        style: TextStyle(
-                                            color: Colors.white, fontSize: 10),
-                                      ),
-                                    ),
-                                    SizedBox(
-                                      width: 5,
-                                    ),
-                                    Container(
-                                      width: 30,
-                                      height: 30,
-                                      alignment: Alignment.center,
+                                Container(
+                                  width: 30,
+                                  height: 30,
+                                  alignment: Alignment.center,
+                                  margin: EdgeInsets.fromLTRB(0, 0, 0, 0),
 
-                                      // padding: EdgeInsets.all(5),
-                                      decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(30),
-                                          color: Colors.redAccent),
-                                      child: Text(
-                                        (data[index]["child_mass"] as List)
-                                            .length
-                                            .toString(),
-                                        style: const TextStyle(
-                                            color: Colors.white, fontSize: 10),
-                                      ),
-                                    ),
-                                    const SizedBox(
-                                      width: 5,
-                                    ),
-                                  ],
-                                )
+                                  // padding: EdgeInsets.all(5),
+                                  // decoration: BoxDecoration(
+                                  //     borderRadius:
+                                  //     BorderRadius.circular(30),
+                                  //     color: Colors.redAccent),
+                                  child: Text(
+                                    (data[index]["child_mass"] as List)
+                                        .length
+                                        .toString(),
+                                    style: TextStyle(
+                                        color: HexColor("#2760ff"),
+                                        fontWeight: FontWeight.w800,
+                                        fontSize: 16),
+                                  ),
+                                ),
                               ],
                             ),
                           ),
@@ -174,7 +143,7 @@ class _ClassRoomsState extends State<ClassRooms> {
                         child: Container(
                           margin: EdgeInsets.fromLTRB(10, 10, 10, 0),
                           padding: EdgeInsets.fromLTRB(0, 10, 0, 5),
-                          height: 40,
+                          height: 70,
                           decoration: BoxDecoration(
                               color: Colors.white,
                               boxShadow: [

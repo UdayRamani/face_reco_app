@@ -1,8 +1,16 @@
 import 'dart:io';
+
 import 'package:face_detaction_app/Screens/login.dart';
+import 'package:face_detaction_app/l10n/l10n.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localization.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:hexcolor/hexcolor.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 import '../Screens/home.dart';
+import 'l10n/language_constant.dart';
+
 class MyHttpOverrides extends HttpOverrides {
   @override
   HttpClient createHttpClient(SecurityContext? context) {
@@ -22,9 +30,29 @@ class MyApp extends StatefulWidget {
 
   @override
   State<MyApp> createState() => _MyAppState();
+
+  static void setLocale(BuildContext context, Locale newLocale) {
+    _MyAppState? state = context.findAncestorStateOfType<_MyAppState>();
+    state?.setLocale(newLocale);
+  }
 }
 
 class _MyAppState extends State<MyApp> {
+  Locale? _locale;
+
+  setLocale(Locale locale) {
+    setState(() {
+      _locale = locale;
+    });
+  }
+
+  @override
+  void didChangeDependencies() {
+    getLocale().then((locale) => {setLocale(locale)});
+    super.didChangeDependencies();
+  }
+
+
   bool checkLogin = false;
   String roles = "";
 
@@ -45,12 +73,16 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
+      // supportedLocales: L10n.all,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      locale: _locale,
       theme: ThemeData(
-          primarySwatch: Colors.deepPurple,
-          primaryColor: Colors.deepPurple,
+          // primarySwatch: HexColor("#2760ff"),
+          primaryColor: HexColor("#2760ff"),
           appBarTheme: AppBarTheme(
               foregroundColor: Colors.white,
-              backgroundColor: Colors.deepPurple,
+              backgroundColor: HexColor("#2760ff"),
               brightness: Brightness.dark)),
       routes: {
         "/home": (context) => const Home(),

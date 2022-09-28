@@ -1,14 +1,8 @@
-import 'dart:convert';
-import 'dart:io';
-
-import 'package:face_detaction_app/Config/api.dart';
 import 'package:face_detaction_app/Screens/attendance/group_list_atted.dart';
-import 'package:face_detaction_app/Screens/attendance/todayAtted.dart';
 import 'package:flutter/material.dart';
-import "package:http/http.dart" as http;
-import 'package:image_picker/image_picker.dart';
-import 'package:localstorage/localstorage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../l10n/language_constant.dart';
 import 'classroom/class_rooms.dart';
 
 class Home extends StatefulWidget {
@@ -19,12 +13,11 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: const Text("Dashboard"),
+          title: Text(translation(context).dashboard),
           centerTitle: true,
           actions: [
             IconButton(
@@ -33,26 +26,24 @@ class _HomeState extends State<Home> {
                       context: context,
                       builder: (BuildContext context) {
                         return AlertDialog(
-                          title: Text('Logout?'),
-                          content:
-                          const Text('Do you want to logout this application?'),
+                          title: Text(translation(context).logout),
+                          content: Text(translation(context).logout_q),
                           actions: <Widget>[
                             FlatButton(
                               onPressed: () {
-                                print("you choose no");
                                 Navigator.of(context).pop(false);
                               },
-                              child: Text('No'),
+                              child: Text(translation(context).not),
                             ),
                             FlatButton(
                               onPressed: () async {
                                 SharedPreferences pref =
-                                await SharedPreferences.getInstance();
+                                    await SharedPreferences.getInstance();
                                 pref.clear();
                                 Navigator.pushNamedAndRemoveUntil(
                                     context, "/login", (route) => false);
                               },
-                              child: Text('Yes'),
+                              child: Text(translation(context).yes),
                             ),
                           ],
                         );
@@ -107,13 +98,13 @@ class _HomeState extends State<Home> {
                           .width * 0.8,
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
-                        children: const [
+                        children: [
                           Icon(
                             Icons.add,
                             color: Colors.white,
                           ),
                           Text(
-                            "Make Attendance",
+                            translation(context).attendance_btn_home,
                             style: TextStyle(color: Colors.white),
                           )
                         ],
@@ -159,7 +150,7 @@ class _HomeState extends State<Home> {
                             width: 10,
                           ),
                           Text(
-                            'Classrooms',
+                            translation(context).class_room,
                             style: TextStyle(color: Colors.white),
                           ),
                         ],
