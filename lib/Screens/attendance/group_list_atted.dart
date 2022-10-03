@@ -45,7 +45,7 @@ class _GroupListAttendState extends State<GroupListAttend> {
     print(password);
     String basicAuth =
         'Basic ${base64.encode(utf8.encode('$username:$password'))}';
-    var url = Api.login;
+    var url = Api.attend;
     print(url);
     Dio dio = Dio();
     dio.options.headers['Authorization'] = basicAuth;
@@ -77,10 +77,13 @@ class _GroupListAttendState extends State<GroupListAttend> {
                             context,
                             MaterialPageRoute(
                               builder: (BuildContext context) => TodayAtted(
-                                students:data[0]["group_mass"][index]["child_mass"],
-                                group_ID:
+                                callBack: () => getDataa(),
+                                students: data[0]["group_mass"][index]
+                                    ["child_mass"],
+                                org_ID:
                                     data[0]["org_ID"].toString().toUpperCase(),
-                                org_ID: data[0]["group_mass"][index]["group_ID"]
+                                group_ID: data[0]["group_mass"][index]
+                                        ["group_id"]
                                     .toString()
                                     .toUpperCase(),
                                 title: data[0]["group_mass"][index]

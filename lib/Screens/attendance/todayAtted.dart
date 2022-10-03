@@ -1,12 +1,12 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import "package:http/http.dart" as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:localstorage/localstorage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shimmer/shimmer.dart';
 
 import '../../Config/api.dart';
 import '../../l10n/language_constant.dart';
@@ -17,13 +17,15 @@ class TodayAtted extends StatefulWidget {
   final String org_ID;
   final String group_ID;
   final List students;
+  final Function callBack;
 
   const TodayAtted(
       {Key? key,
       required this.title,
       required this.org_ID,
       required this.group_ID,
-      required this.students})
+      required this.students,
+      required this.callBack})
       : super(key: key);
 
   @override
@@ -37,6 +39,50 @@ class _TodayAttedState extends State<TodayAtted> {
   final TextEditingController maxHeightController = TextEditingController();
   final TextEditingController qualityController = TextEditingController();
   bool checkLoaderForAttend = false;
+
+  var FinalData = [];
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    getDatas();
+    super.initState();
+  }
+
+  void getDatas() {
+    for (var d in widget.students) {
+      //   final response = await http.get(Uri.parse(
+      //       "https://fas.qazna24.kz/static/students/${d["child_iin"]}.png"));
+      //   print(response.statusCode);
+      //   if (response.statusCode == 200) {
+      if (d["child_present"] == "true") {
+        FinalData.add({
+          "child_name": d["child_name"].toString(),
+          "child_iin": d["child_iin"].toString(),
+          "child_present": d["child_present"].toString(),
+          "color": "green"
+        });
+        setState(() {});
+      } else {
+        FinalData.add({
+          "child_name": d["child_name"].toString(),
+          "child_iin": d["child_iin"].toString(),
+          "child_present": d["child_present"].toString(),
+          "color": "red"
+        });
+        setState(() {});
+      }
+      // } else {
+      //   FinalData.add({
+      //     "child_name": d["child_name"].toString(),
+      //     "child_iin": d["child_iin"].toString(),
+      //     "child_present": d["child_present"].toString(),
+      //     "color": "gray"
+      //   });
+      //   setState(() {});
+      // }
+    }
+  }
 
   Future<void> _onImageButtonPressed(
     ImageSource source, {
@@ -82,11 +128,9 @@ class _TodayAttedState extends State<TodayAtted> {
     if (jsonMap["Status"] == 200) {
       _onLoading(false);
 
-      setState(() {
-        checkLoaderForAttend = false;
-      });
-      _save(jsonMap["St_ids"] as List);
-      setState(() {});
+      checkLoaderForAttend = false;
+
+      _save((jsonMap["St_ids"] as List));
 
       Widget okButton = TextButton(
         child: Text(translation(context).okay),
@@ -94,6 +138,7 @@ class _TodayAttedState extends State<TodayAtted> {
           Navigator.pop(context);
         },
       );
+
       Widget okButton1 = TextButton(
         child: Text(
           translation(context).new_attendance,
@@ -103,6 +148,7 @@ class _TodayAttedState extends State<TodayAtted> {
               context: context, imageQuality: 85);
         },
       );
+
       AlertDialog alert = AlertDialog(
         title: Text(translation(context).successfully,
             style: TextStyle(color: Colors.green)),
@@ -157,9 +203,8 @@ class _TodayAttedState extends State<TodayAtted> {
         },
       );
     }
-    setState(() {
-      image = pickedFile;
-    });
+    image = pickedFile;
+    setState(() {});
     // _upload();
   }
 
@@ -217,18 +262,59 @@ class _TodayAttedState extends State<TodayAtted> {
   }
 
   void _save(List data) {
-    storage.setItem(widget.title, data);
-    displayData.addAll(widget.students);
+    print(data);
+    // FinalData.clear();
     Datass.addAll(data);
-    for (var d in displayData) {
+    for (var d = 0; d < FinalData.length; d++) {
       for (var e in data) {
-        if (e.toString() == d["child_iin"].toString()) {
-          finaldisplayDataWithName.add(d);
+        print(d);
+        if (e.toString() == FinalData[d]["child_iin"].toString()) {
+          print(FinalData[d]);
+          FinalData[d] = {
+            "child_name": FinalData[d]["child_name"].toString(),
+            "child_iin": FinalData[d]["child_iin"].toString(),
+            "child_present": FinalData[d]["child_present"].toString(),
+            "color": "green"
+          };
         }
+        // if (e.toString() != d["child_iin"].toString()) {
+        //   FinalData.add({
+        //     "child_name": d["child_name"],
+        //     "child_iin": d["child_iin"],
+        //     "child_present": d["child_present"],
+        //     "color": "red"
+        //   });
+        // }
+        // }
+        // else {
+        //   FinalData.add({
+        //     "child_name": d["child_name"],
+        //     "child_iin": d["child_iin"],
+        //     "child_present": d["child_present"],
+        //     "color": "red"
+        //   });
       }
     }
-    print(finaldisplayDataWithName);
     setState(() {});
+
+    print(FinalData);
+    // }
+    // setState(() {});
+    // storage.setItem(widget.title, data);
+    // displayData.addAll(widget.students);
+    // print(data);
+    // Datass.addAll(data.where((element) => element["child_present"] != true));
+    // Datass.addAll(data);
+    // for (var d in displayData) {
+    //   for (var e in data) {
+    //     print(d);
+    //     if (e.toString() == d["child_iin"].toString()) {
+    //       finaldisplayDataWithName.add(d);
+    //     }
+    //   }
+    // }
+    // print(finaldisplayDataWithName);
+    // setState(() {});
   }
 
   _clearStorage() async {
@@ -250,19 +336,47 @@ class _TodayAttedState extends State<TodayAtted> {
       'Authorization': basicAuth,
       'Content-Type': 'application/json'
     };
+
+    String gropId = widget.group_ID.toString();
+    var data = {
+      "org_ID": widget.org_ID,
+      "group_mass": [
+        {"group_ID": gropId, "visited": Datass}
+      ]
+    };
+    print(data);
+    // print({
+    //   "org_ID": widget.org_ID,
+    //   "group_mass": [
+    //     {"group_ID": gropId, "visited": Datass}
+    //   ]
+    // });
     var request = http.Request(
-        'POST', Uri.parse('https://kzo.qaznaonline.kz/kzo/hs/DDO/visited'));
+        'POST', Uri.parse(Api.visited));
     request.body = json.encode([
       {
-        "org_ID": widget.org_ID,
+        "org_ID": int.parse(widget.org_ID),
         "group_mass": [
-          {"group_ID": widget.group_ID, "visited": Datass}
+          {"group_ID": gropId, "visited": Datass}
         ]
       }
     ]);
-
+    // Dio dio = Dio();
+    // // dio.options.headers['Authorization'] = basicAuth;
+    // var response = await dio.post(
+    //   Uri.parse('https://kzo.qaznaonline.kz/kzo/hs/DDO/visited').toString(),
+    //   data: data,
+    //   options: Options(
+    //     headers: {'Authorization': basicAuth},
+    //   ),
+    // );
+    // print(response.data);
     request.headers.addAll(headers);
     http.StreamedResponse response = await request.send();
+    var responseBody = await http.Response.fromStream(response);
+    // var ress=json.decode(responseBody.body);
+
+    // print(Api().getBody(responseBody));
     if (response.statusCode == 200) {
       _onLoading(false);
       Widget okButton = TextButton(
@@ -291,113 +405,87 @@ class _TodayAttedState extends State<TodayAtted> {
         },
       );
     } else {
+      print(response.statusCode);
       _onLoading(false);
+    }
+  }
+
+  Future<bool> checkURLs(url) async {
+    final response = await http.get(Uri.parse(url));
+    if (response.statusCode == 200) {
+      return true;
+    } else {
+      return false;
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-        actions: [
-          GestureDetector(
-              onTap: () {
-                if (finaldisplayDataWithName.isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                      backgroundColor: Colors.red,
-                      content: Text(
-                        translation(context).atten_empty,
-                      )));
-                } else {
+        appBar: AppBar(
+          title: Text(widget.title),
+          actions: [
+            // GestureDetector(
+            //     onTap: () {
+            //       Navigator.push(
+            //           context,
+            //           MaterialPageRoute(
+            //               builder: (BuildContext context) => AttendList(
+            //                     Data: widget.students,
+            //                   )));
+            //     },
+            //     child: const Padding(
+            //       padding: EdgeInsets.all(8.0),
+            //       child: Icon(Icons.list_alt_rounded),
+            //     )),
+            GestureDetector(
+                onTap: () {
+                  // if (Datass.isEmpty) {
+                  //   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  //       backgroundColor: Colors.red,
+                  //       content: Text(
+                  //         translation(context).atten_empty,
+                  //       )));
+                  // } else {
                   Attendnce();
-                }
-              },
-              child: const Padding(
-                padding: EdgeInsets.all(8.0),
-                child: Icon(Icons.save),
-              ))
-        ],
-      ),
-      floatingActionButton: checkLoaderForAttend
-          ? Container(
-              decoration: BoxDecoration(
-                  // color: data[index]["ap"].toString() == "P"
-                  //     ? Colors.green[200]
-                  //     : Colors.red[200],
-                  color: Colors.blue,
-                  boxShadow: [
-                    BoxShadow(
-                        blurRadius: 0.2,
-                        offset: Offset.fromDirection(1),
-                        color: Colors.black12,
-                        spreadRadius: 1)
-                  ],
-                  borderRadius: BorderRadius.circular(5)),
-              child: Container(
-                  margin: EdgeInsets.fromLTRB(8, 8, 8, 8),
-                  child: CircularProgressIndicator()),
-            )
-          : GestureDetector(
-              onTap: () {
-                _onImageButtonPressed(ImageSource.camera,
-                    context: context, imageQuality: 85);
-              },
-              child: Container(
-                  decoration: BoxDecoration(
-                      // color: data[index]["ap"].toString() == "P"
-                      //     ? Colors.green[200]
-                      //     : Colors.red[200],
-                      color: Colors.deepPurple,
-                      boxShadow: [
-                        BoxShadow(
-                            blurRadius: 0.2,
-                            offset: Offset.fromDirection(1),
-                            color: Colors.black12,
-                            spreadRadius: 1)
-                      ],
-                      borderRadius: BorderRadius.circular(50)),
-                  child: Container(
+                  // }
+                },
+                child: const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Icon(Icons.save),
+                ))
+          ],
+        ),
+        floatingActionButton: checkLoaderForAttend
+            ? Container(
+                decoration: BoxDecoration(
+                    // color: data[index]["ap"].toString() == "P"
+                    //     ? Colors.green[200]
+                    //     : Colors.red[200],
+                    color: Colors.blue,
+                    boxShadow: [
+                      BoxShadow(
+                          blurRadius: 0.2,
+                          offset: Offset.fromDirection(1),
+                          color: Colors.black12,
+                          spreadRadius: 1)
+                    ],
+                    borderRadius: BorderRadius.circular(5)),
+                child: Container(
                     margin: EdgeInsets.fromLTRB(8, 8, 8, 8),
-                    child: Icon(
-                      Icons.camera_alt,
-                      color: Colors.white,
-                      size: 35,
-                    ),
-                  ))),
-      body: Container(
-          padding: EdgeInsets.all(10.0),
-          constraints: BoxConstraints.expand(),
-          child: FutureBuilder(
-            future: storage.ready,
-            builder: (BuildContext context, AsyncSnapshot snapshot) {
-              if (snapshot.data == null) {
-                return Center(
-                  child: CircularProgressIndicator(),
-                );
-              }
-
-              // if (!initialized) {
-              //   var items = storage.getItem('todos');
-              //
-              //   if (items != null) {
-              //     Datass = List.from(
-              //       (items as List).map((item) => Datass.add(item)),
-              //     );
-              //   }
-              //
-              //   initialized = true;
-              // }
-
-              List<Widget> widgets = finaldisplayDataWithName.map((item) {
-                return Container(
-                    margin: EdgeInsets.fromLTRB(5, 5, 5, 0),
-                    padding: EdgeInsets.fromLTRB(10, 10, 0, 0),
+                    child: CircularProgressIndicator()),
+              )
+            : GestureDetector(
+                onTap: () {
+                  _onImageButtonPressed(ImageSource.camera,
+                      context: context, imageQuality: 85);
+                },
+                child: Container(
                     decoration: BoxDecoration(
                         // color: data[index]["ap"].toString() == "P"
                         //     ? Colors.green[200]
                         //     : Colors.red[200],
-                        color: Colors.deepPurple[200],
+                        color: Colors.deepPurple,
                         boxShadow: [
                           BoxShadow(
                               blurRadius: 0.2,
@@ -405,44 +493,418 @@ class _TodayAttedState extends State<TodayAtted> {
                               color: Colors.black12,
                               spreadRadius: 1)
                         ],
-                        borderRadius: BorderRadius.circular(5)),
-                    child: Text(item["child_name"].toString()));
-              }).toList();
-
-              return Column(
-                children: <Widget>[
-                  const SizedBox(
-                    height: 15,
-                  ),
-                  Expanded(
-                    flex: 1,
-                    child: ListView(
-                      itemExtent: 50.0,
-                      children: widgets,
-                    ),
-                  ),
-                  // Container(
-                  //   margin: EdgeInsets.fromLTRB(5, 5, 5, 40),
-                  //   decoration: BoxDecoration(
-                  //       // color: data[index]["ap"].toString() == "P"
-                  //       //     ? Colors.green[200]
-                  //       //     : Colors.red[200],
-                  //       color: Colors.blue,
-                  //       boxShadow: [
-                  //         BoxShadow(
-                  //             blurRadius: 0.2,
-                  //             offset: Offset.fromDirection(1),
-                  //             color: Colors.black12,
-                  //             spreadRadius: 1)
-                  //       ],
-                  //       borderRadius: BorderRadius.circular(5)),
-                  //   padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
-                  //   child: const Text("Make Attendance"),
-                  // )
-                ],
-              );
-            },
-          )),
-    );
+                        borderRadius: BorderRadius.circular(50)),
+                    child: Container(
+                      margin: EdgeInsets.fromLTRB(8, 8, 8, 8),
+                      child: Icon(
+                        Icons.camera_alt,
+                        color: Colors.white,
+                        size: 35,
+                      ),
+                    ))),
+        body: Container(
+          color: Colors.white,
+          margin: EdgeInsets.fromLTRB(0, 0, 0, 10),
+          child: FinalData.isNotEmpty
+              ? ListView.builder(
+                  itemBuilder: (context, index) {
+                    return Container(
+                      margin: const EdgeInsets.fromLTRB(10, 20, 10, 0),
+                      padding: const EdgeInsets.fromLTRB(0, 10, 0, 5),
+                      decoration: BoxDecoration(
+                          // color: data[index]["ap"].toString() == "P"
+                          //     ? Colors.green[200]
+                          //     : Colors.red[200],
+                          color: FinalData[index]["color"] == "green"
+                              ? Colors.green.shade100
+                              : FinalData[index]["color"] == "red"
+                                  ? Colors.red.shade100
+                                  : Colors.white,
+                          boxShadow: [
+                            BoxShadow(
+                                blurRadius: 0.2,
+                                offset: Offset.fromDirection(1),
+                                color: Colors.black12,
+                                spreadRadius: 1)
+                          ],
+                          border: Border.all(
+                              color: FinalData[index]["color"] == "green"
+                                  ? Colors.green
+                                  : FinalData[index]["color"] == "red"
+                                      ? Colors.red
+                                      : Colors.grey),
+                          borderRadius: BorderRadius.circular(5)),
+                      // decoration: FinalData[index]["color"] == "gray"
+                      //     ? BoxDecoration(
+                      //         border: Border.all(color: Colors.grey.shade300),
+                      //         borderRadius: BorderRadius.circular(5))
+                      //     : BoxDecoration(
+                      //         // color: data[index]["ap"].toString() == "P"
+                      //         //     ? Colors.green[200]
+                      //         //     : Colors.red[200],
+                      //         color: FinalData[index]["color"] == "green"
+                      //             ? Colors.green.shade100
+                      //             : FinalData[index]["color"] == "red"
+                      //                 ? Colors.red.shade100
+                      //                 : Colors.white,
+                      //         boxShadow: [
+                      //           BoxShadow(
+                      //               blurRadius: 0.2,
+                      //               offset: Offset.fromDirection(1),
+                      //               color: Colors.black12,
+                      //               spreadRadius: 1)
+                      //         ],
+                      //         border: Border.all(
+                      //             color: FinalData[index]["color"] == "green"
+                      //                 ? Colors.green
+                      //                 : FinalData[index]["color"] == "red"
+                      //                     ? Colors.red
+                      //                     : Colors.grey),
+                      //         borderRadius: BorderRadius.circular(5)),
+                      child: Container(
+                        padding: const EdgeInsets.fromLTRB(10, 15, 10, 15),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            // Container(
+                            //     width: 50,
+                            //     height: 50,
+                            //     margin: const EdgeInsets.fromLTRB(0, 0, 25, 0),
+                            //     decoration: BoxDecoration(
+                            //         color: Colors.white,
+                            //         borderRadius: BorderRadius.circular(10)),
+                            //     // child: Icon(Icons.camera_alt)
+                            //     child: ClipRRect(
+                            //       borderRadius: BorderRadius.circular(8.0),
+                            //       child: FadeInImage(
+                            //         image: NetworkImage(
+                            //           "https://fas.qazna24.kz/static/students/${FinalData[index]["child_iin"]}.png",
+                            //         ),
+                            //         placeholder: const NetworkImage(
+                            //           "https://i.gifer.com/origin/d3/d3f472b06590a25cb4372ff289d81711_w200.gif",
+                            //         ),
+                            //         imageErrorBuilder:
+                            //             (context, error, stackTrace) {
+                            //           return GestureDetector(
+                            //             onTap: () {
+                            //               // _onImageButtonPressed(
+                            //               //     ImageSource.camera,
+                            //               //     widget.Data[index]["child_iin"]
+                            //               //         .toString(),
+                            //               //     context: context,
+                            //               //     imageQuality: 85);
+                            //             },
+                            //             child: Container(
+                            //               width: 20,
+                            //               height: 20,
+                            //               padding: EdgeInsets.all(5),
+                            //               decoration: BoxDecoration(
+                            //                   color: Colors.white,
+                            //                   border: Border.all(
+                            //                       color: Colors.grey.shade300),
+                            //                   borderRadius:
+                            //                       BorderRadius.circular(50)),
+                            //               child: Image.network(
+                            //                 'https://img.icons8.com/ios-glyphs/480/camera--v1.png',
+                            //                 filterQuality: FilterQuality.medium,
+                            //                 color: Colors.grey,
+                            //                 width: 20,
+                            //               ),
+                            //             ),
+                            //           );
+                            //         },
+                            //         fit: BoxFit.fitWidth,
+                            //       ),
+                            //     )),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    FinalData[index]["child_name"]
+                                        .toString()
+                                        .toUpperCase(),
+                                    overflow: TextOverflow.fade,
+                                    style: TextStyle(
+                                        // color: FinalData[index]["color"] ==
+                                        //         "gray"
+                                        //     ? Colors.grey.shade400
+                                        //     : Colors.black,
+                                        color: Colors.black,
+                                        fontWeight: FontWeight.w500,
+                                        fontSize: 13),
+                                  ),
+                                  Container(
+                                    margin: EdgeInsets.fromLTRB(0, 6, 0, 0),
+                                    child: Text(
+                                      FinalData[index]["child_iin"],
+                                      style: TextStyle(
+                                          // color: FinalData[index]["color"] ==
+                                          //         "gray"
+                                          //     ? Colors.grey.shade300
+                                          //     : Colors.black,
+                                          color: Colors.black,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w500),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                  itemCount: FinalData.length)
+              : ListView.builder(
+                  itemBuilder: (context, index) {
+                    return Shimmer.fromColors(
+                        baseColor: Colors.grey.shade400,
+                        highlightColor: Colors.black12,
+                        child: Container(
+                          margin: const EdgeInsets.fromLTRB(10, 10, 10, 0),
+                          padding: const EdgeInsets.fromLTRB(0, 10, 0, 5),
+                          height: 70,
+                          decoration: BoxDecoration(
+                              color: Colors.white,
+                              boxShadow: [
+                                BoxShadow(
+                                    blurRadius: 0.2,
+                                    offset: Offset.fromDirection(1),
+                                    color: Colors.black12,
+                                    spreadRadius: 1)
+                              ],
+                              borderRadius: BorderRadius.circular(5)),
+                          width: double.infinity,
+                        ));
+                  },
+                  itemCount: 20),
+        ));
   }
 }
+
+//   body: Container(
+//       padding: EdgeInsets.all(10.0),
+//       constraints: BoxConstraints.expand(),
+//       child: FutureBuilder(
+//         future: storage.ready,
+//         builder: (BuildContext context, AsyncSnapshot snapshot) {
+//           if (snapshot.data == null) {
+//             return Center(
+//               child: CircularProgressIndicator(),
+//             );
+//           }
+//
+//           // if (!initialized) {
+//           //   var items = storage.getItem('todos');
+//           //
+//           //   if (items != null) {
+//           //     Datass = List.from(
+//           //       (items as List).map((item) => Datass.add(item)),
+//           //     );
+//           //   }
+//           //
+//           //   initialized = true;
+//           // }
+//
+//           List<Widget> widgets = finaldisplayDataWithName.map((item) {
+//             return Container(
+//                 margin: EdgeInsets.fromLTRB(5, 5, 5, 0),
+//                 padding: EdgeInsets.fromLTRB(10, 10, 0, 10),
+//                 decoration: BoxDecoration(
+//                     // color: data[index]["ap"].toString() == "P"
+//                     //     ? Colors.green[200]
+//                     //     : Colors.red[200],
+//                     color: item["child_present"] == true
+//                         ? Colors.deepPurple[200]
+//                         : Colors.grey,
+//                     boxShadow: [
+//                       BoxShadow(
+//                           blurRadius: 0.2,
+//                           offset: Offset.fromDirection(1),
+//                           color: Colors.black12,
+//                           spreadRadius: 1)
+//                     ],
+//                     borderRadius: BorderRadius.circular(5)),
+//                 child: Column(
+//                   children: [
+//                     Text(item["child_name"].toString()),
+//                     Text(item["child_present"] == true
+//                         ? ""
+//                         : "already Registered"),
+//                   ],
+//                 ));
+//           }).toList();
+//
+//           return Column(
+//             children: <Widget>[
+//               const SizedBox(
+//                 height: 15,
+//               ),
+//               Expanded(
+//                 flex: 1,
+//                 child: ListView(
+//                   itemExtent: 50.0,
+//                   children: widgets,
+//                 ),
+//               ),
+//               // Container(
+//               //   margin: EdgeInsets.fromLTRB(5, 5, 5, 40),
+//               //   decoration: BoxDecoration(
+//               //       // color: data[index]["ap"].toString() == "P"
+//               //       //     ? Colors.green[200]
+//               //       //     : Colors.red[200],
+//               //       color: Colors.blue,
+//               //       boxShadow: [
+//               //         BoxShadow(
+//               //             blurRadius: 0.2,
+//               //             offset: Offset.fromDirection(1),
+//               //             color: Colors.black12,
+//               //             spreadRadius: 1)
+//               //       ],
+//               //       borderRadius: BorderRadius.circular(5)),
+//               //   padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
+//               //   child: const Text("Make Attendance"),
+//               // )
+//             ],
+//           );
+//         },
+//       )),
+// );
+
+// return FutureBuilder<bool>(
+//   future: checkURLs(
+//       "https://fas.qazna24.kz/static/students/${widget.students[index]["child_iin"]}.png"),
+//   // a previously-obtained Future<String> or null
+//   builder: (context, snapshot) {
+//     if (snapshot.data == true) {
+//       return Container(
+//         margin: EdgeInsets.fromLTRB(10, 20, 10, 0),
+//         padding: EdgeInsets.fromLTRB(0, 10, 0, 5),
+//         decoration: BoxDecoration(
+//             // color: data[index]["ap"].toString() == "P"
+//             //     ? Colors.green[200]
+//             //     : Colors.red[200],
+//             color: widget.students[index]
+//                         ["child_present"] ==
+//                     true
+//                 ? Colors.green.shade100
+//                 : Colors.red.shade100,
+//             boxShadow: [
+//               BoxShadow(
+//                   blurRadius: 0.2,
+//                   offset: Offset.fromDirection(1),
+//                   color: Colors.black12,
+//                   spreadRadius: 1)
+//             ],
+//             border: Border.all(
+//                 color: widget.students[index]
+//                             ["child_present"] ==
+//                         true
+//                     ? Colors.green
+//                     : Colors.red),
+//             borderRadius: BorderRadius.circular(5)),
+//         child: Container(
+//           padding: EdgeInsets.fromLTRB(10, 15, 10, 15),
+//           child: Row(
+//             mainAxisAlignment:
+//                 MainAxisAlignment.spaceBetween,
+//             children: [
+//               Container(
+//                   width: 50,
+//                   height: 50,
+//                   margin: EdgeInsets.fromLTRB(0, 0, 25, 0),
+//                   decoration: BoxDecoration(
+//                       color: Colors.white,
+//                       borderRadius:
+//                           BorderRadius.circular(10)),
+//                   // child: Icon(Icons.camera_alt)
+//                   child: ClipRRect(
+//                     borderRadius:
+//                         BorderRadius.circular(8.0),
+//                     child: FadeInImage(
+//                       image: NetworkImage(
+//                         "https://fas.qazna24.kz/static/students/${widget.students[index]["child_iin"]}.png",
+//                       ),
+//                       placeholder: const NetworkImage(
+//                         "https://i.gifer.com/origin/d3/d3f472b06590a25cb4372ff289d81711_w200.gif",
+//                       ),
+//                       imageErrorBuilder:
+//                           (context, error, stackTrace) {
+//                         return GestureDetector(
+//                           onTap: () {
+//                             // _onImageButtonPressed(
+//                             //     ImageSource.camera,
+//                             //     widget.Data[index]["child_iin"]
+//                             //         .toString(),
+//                             //     context: context,
+//                             //     imageQuality: 85);
+//                           },
+//                           child: Container(
+//                             width: 20,
+//                             height: 20,
+//                             padding: EdgeInsets.all(5),
+//                             decoration: BoxDecoration(
+//                                 color: Colors.white,
+//                                 border: Border.all(
+//                                     color: Colors.black),
+//                                 borderRadius:
+//                                     BorderRadius.circular(
+//                                         50)),
+//                             child: Image.network(
+//                               'https://img.icons8.com/ios-glyphs/480/camera--v1.png',
+//                               filterQuality:
+//                                   FilterQuality.medium,
+//                               width: 20,
+//                             ),
+//                           ),
+//                         );
+//                       },
+//                       fit: BoxFit.fitWidth,
+//                     ),
+//                   )),
+//               Expanded(
+//                 child: Column(
+//                   crossAxisAlignment:
+//                       CrossAxisAlignment.start,
+//                   children: [
+//                     Container(
+//                       child: Text(
+//                         widget.students[index]["child_name"]
+//                             .toString()
+//                             .toUpperCase(),
+//                         overflow: TextOverflow.fade,
+//                         style: TextStyle(
+//                             color: Colors.black,
+//                             fontWeight: FontWeight.w500,
+//                             fontSize: 13),
+//                       ),
+//                     ),
+//                     Container(
+//                       margin:
+//                           EdgeInsets.fromLTRB(0, 6, 0, 0),
+//                       child: Text(
+//                         widget.students[index]["child_iin"],
+//                         style: TextStyle(
+//                             color: Colors.black,
+//                             fontSize: 12,
+//                             fontWeight: FontWeight.w500),
+//                       ),
+//                     ),
+//                   ],
+//                 ),
+//               ),
+//             ],
+//           ),
+//         ),
+//       );
+//     } else {
+//       return Container(
+//         height: 20,
+//         width: 200,
+//         color: Colors.red,
+//       );
+//     }
+//   },
+// );

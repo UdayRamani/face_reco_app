@@ -12,7 +12,7 @@ class CustomePhotoView extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: Text(
+        title: const Text(
           "PreviewImage",
           style: TextStyle(
             color: Colors.purple,
@@ -23,7 +23,7 @@ class CustomePhotoView extends StatelessWidget {
           onTap: () {
             Navigator.pop(context);
           },
-          child: Icon(
+          child:const Icon(
             Icons.arrow_back_ios,
             color: Colors.deepPurple,
           ),

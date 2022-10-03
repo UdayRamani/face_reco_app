@@ -1,14 +1,13 @@
 import 'dart:convert';
 
-import 'package:face_detaction_app/l10n/language_constant.dart';
-import 'package:face_detaction_app/l10n/languagess.dart';
-import 'package:face_detaction_app/main.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:hexcolor/hexcolor.dart';
 import "package:http/http.dart" as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../Config/api.dart';
+import '../l10n/language_constant.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -51,29 +50,36 @@ class _LoginScreenState extends State<LoginScreen> {
     });
     // String username = 'test';
     // String password = '123£';
-    String basicAuth =
-        'Basic ' + base64.encode(utf8.encode('$username:$password'));
-    var url = Api.login;
-    print(url);
-    var response = await http.get(Uri.parse(url),
-        // body: jsonEncode({'username': username, 'password': password}),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': basicAuth
-        });
+    // String basicAuth =
+    //     'Basic ' + base64.encode(utf8.encode('$username:$password'));
+    // var url = Api.login;
+    // print(url);
+    // var response = await http.get(Uri.parse(url),
+    //     // body: jsonEncode({'username': username, 'password': password}),
+    //     headers: {
+    //       'Content-Type': 'application/json',
+    //       'Authorization': basicAuth
+    //     });
     // var requestRes;
 
-    print(response.body);
+    String basicAuth =
+        'Basic ${base64.encode(utf8.encode('$username:$password'))}';
+    var url = Api.attend;
+    print(url);
+    Dio dio = Dio();
+    dio.options.headers['Authorization'] = basicAuth;
+    var response = await dio.get(url);
 
     if (response.statusCode == 200) {
       setState(() {
         visibilityB = false;
       });
-      var jsonMap = json.decode(response.body);
+      // var jsonMap = json.decode(response.data);
       SharedPreferences pref = await SharedPreferences.getInstance();
       pref.setBool("loginScreen", true);
       pref.setString("username", username);
       pref.setString("password", password);
+      pref.setString("org_name", response.data[0]["org_name"]);
       // pref.setString("username", jsonMap["username"].toString());
       // pref.setString("email", jsonMap["email"].toString());
       // pref.setString("user_id", jsonMap["id"].toString());
@@ -84,10 +90,9 @@ class _LoginScreenState extends State<LoginScreen> {
           SnackBar(
               backgroundColor: Colors.green,
               duration: const Duration(seconds: 3),
-              content: Text(jsonMap["message"].toString())),
+              content: Text(response.data["message"].toString())),
         );
       });
-      print(response.body);
     } else {
       setState(() {
         visibilityB = false;
@@ -120,36 +125,36 @@ class _LoginScreenState extends State<LoginScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Container(
-                    alignment: Alignment.centerRight,
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: DropdownButton<Languages>(
-                        // value: dropdownvalue,
-                        underline: SizedBox(),
-                        icon: Icon(
-                          Icons.language,
-                          color: HexColor("#5519ff"),
-                        ),
-                        items: Languages.languageList()
-                            .map<DropdownMenuItem<Languages>>((items) {
-                          return DropdownMenuItem<Languages>(
-                            value: items,
-                            child: Text(items.name),
-                          );
-                        }).toList(),
-                        onChanged: (Languages? newValue) async {
-                          print(newValue!.languageCode.toString());
-                          Locale _locale =
-                              await setLocale(newValue.languageCode);
-                          MyApp.setLocale(context, _locale);
-                        },
-                      ),
-                    ),
-                  ),
+                  // Container(
+                  //   alignment: Alignment.centerRight,
+                  //   child: Padding(
+                  //     padding: const EdgeInsets.all(8.0),
+                  //     child: DropdownButton<Languages>(
+                  //       // value: dropdownvalue,
+                  //       underline: SizedBox(),
+                  //       icon: Icon(
+                  //         Icons.language,
+                  //         color: HexColor("#5519ff"),
+                  //       ),
+                  //       items: Languages.languageList()
+                  //           .map<DropdownMenuItem<Languages>>((items) {
+                  //         return DropdownMenuItem<Languages>(
+                  //           value: items,
+                  //           child: Text(items.name),
+                  //         );
+                  //       }).toList(),
+                  //       onChanged: (Languages? newValue) async {
+                  //         print(newValue!.languageCode.toString());
+                  //         Locale _locale =
+                  //             await setLocale(newValue.languageCode);
+                  //         MyApp.setLocale(context, _locale);
+                  //       },
+                  //     ),
+                  //   ),
+                  // ),
                   Container(
                     alignment: Alignment.center,
-                    margin: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+                    margin: const EdgeInsets.fromLTRB(20, 100, 20, 0),
                     child: Center(child: Image.asset("assets/logingif.gif")),
                   ),
                   Container(

@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../l10n/language_constant.dart';
+import '../l10n/languagess.dart';
+import '../main.dart';
 import 'classroom/class_rooms.dart';
 
 class Home extends StatefulWidget {
@@ -14,46 +16,124 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   @override
+  void initState() {
+    // TODO: implement initState
+    getDataa();
+    getLocale().then((locale) => {Lng = locale.languageCode});
+    super.initState();
+  }
+
+  String headerTitle = "";
+  String Lng = "";
+
+  void getDataa() async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    headerTitle = pref.getString("org_name").toString();
+    setState(() {});
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text(translation(context).dashboard),
-          centerTitle: true,
+          title: Text(headerTitle),
+
+          // title: Text(translation(context).dashboard),
+          // centerTitle: true,
           actions: [
-            IconButton(
-                onPressed: () {
-                  showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return AlertDialog(
-                          title: Text(translation(context).logout),
-                          content: Text(translation(context).logout_q),
-                          actions: <Widget>[
-                            FlatButton(
-                              onPressed: () {
-                                Navigator.of(context).pop(false);
-                              },
-                              child: Text(translation(context).not),
-                            ),
-                            FlatButton(
-                              onPressed: () async {
-                                SharedPreferences pref =
-                                    await SharedPreferences.getInstance();
-                                pref.clear();
-                                Navigator.pushNamedAndRemoveUntil(
-                                    context, "/login", (route) => false);
-                              },
-                              child: Text(translation(context).yes),
-                            ),
-                          ],
-                        );
-                      });
-                },
-                icon: const Icon(Icons.logout))
+            // Container(
+            //   // width: 30,
+            //   // height: 10,
+            //   margin: const EdgeInsets.fromLTRB(0, 0, 10, 0),
+            //   alignment: Alignment.center,
+            //   decoration: BoxDecoration(
+            //       color: Colors.white, borderRadius: BorderRadius.circular(50)),
+            //   child: DropdownButton<Languages>(
+            //     // value: dropdownvalue,
+            //     underline: SizedBox(),
+            //     icon: Icon(
+            //       Icons.language,
+            //       color: HexColor("#5519ff"),
+            //     ),
+            //     items: Languages.languageList()
+            //         .map<DropdownMenuItem<Languages>>((items) {
+            //       return DropdownMenuItem<Languages>(
+            //         value: items,
+            //         child: Text(items.name),
+            //       );
+            //     }).toList(),
+            //     onChanged: (Languages? newValue) async {
+            //       print(newValue!.languageCode.toString());
+            //       Locale _locale = await setLocale(newValue.languageCode);
+            //       MyApp.setLocale(context, _locale);
+            //     },
+            //   ),
+            // ),
+            // IconButton(
+            //     onPressed: () {
+            //       showDialog(
+            //           context: context,
+            //           builder: (BuildContext context) {
+            //             return AlertDialog(
+            //               title: Text(translation(context).logout),
+            //               content: Text(translation(context).logout_q),
+            //               actions: <Widget>[
+            //                 FlatButton(
+            //                   onPressed: () {
+            //                     Navigator.of(context).pop(false);
+            //                   },
+            //                   child: Text(translation(context).not),
+            //                 ),
+            //                 FlatButton(
+            //                   onPressed: () async {
+            //                     SharedPreferences pref =
+            //                         await SharedPreferences.getInstance();
+            //                     pref.clear();
+            //                     Navigator.pushNamedAndRemoveUntil(
+            //                         context, "/login", (route) => false);
+            //                   },
+            //                   child: Text(translation(context).yes),
+            //                 ),
+            //               ],
+            //             );
+            //           });
+            //     },
+            //     icon: const Icon(Icons.logout))
+            Container(
+              alignment: Alignment.center,
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: DropdownButton<Languages>(
+                  // value: dropdownvalue,
+                  underline: SizedBox(),
+                  icon: Container(
+                    padding: EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(50)),
+                    child: Text(Lng),
+                  ),
+                  items: Languages.languageList()
+                      .map<DropdownMenuItem<Languages>>((items) {
+                    return DropdownMenuItem<Languages>(
+                      value: items,
+                      child: Text(items.name),
+                    );
+                  }).toList(),
+                  onChanged: (Languages? newValue) async {
+                    Lng = newValue!.name.toString();
+
+                    Locale _locale = await setLocale(newValue.languageCode);
+                    MyApp.setLocale(context, _locale);
+                  },
+                ),
+              ),
+            ),
           ],
         ),
 
         body: Container(
+          color: Colors.white,
           child: Column(children: [
             Expanded(
               child: Container(
@@ -63,9 +143,24 @@ class _HomeState extends State<Home> {
                         image: AssetImage("assets/dashboard.gif"))),
               ),
             ),
+            const SizedBox(
+              height: 10,
+            ),
+
+            // Text("Welcome!",
+            //
+            //   style: TextStyle(fontSize: 25,fontWeight: FontWeight.w500),
+            //
+            // ),
+            // SizedBox(height: 5,),
+            // Text("To get Started,register your child's photo in our system\nand enter a record of attendance each day",
+            // textAlign: TextAlign.center,
+            //   style: TextStyle(color: Colors.grey),
+            //
+            // ),
             Container(
               color: Colors.white,
-              margin: EdgeInsets.fromLTRB(0, 0, 0, 20),
+              margin: EdgeInsets.fromLTRB(0, 50, 0, 20),
               child: Column(
                 children: [
                   InkWell(
@@ -73,8 +168,8 @@ class _HomeState extends State<Home> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (BuildContext context) => GroupListAttend()
-                        ),
+                            builder: (BuildContext context) =>
+                                GroupListAttend()),
                       );
                     },
                     child: Container(
@@ -160,49 +255,66 @@ class _HomeState extends State<Home> {
                   SizedBox(
                     height: 10,
                   ),
-                  // InkWell(
-                  //   onTap: () {
-                  //     Navigator.push(
-                  //       context,
-                  //       MaterialPageRoute(
-                  //         builder: (BuildContext context) => Atted(),
-                  //       ),
-                  //     );
-                  //   },
-                  //   child: Container(
-                  //     decoration: BoxDecoration(
-                  //       borderRadius: BorderRadius.circular(10),
-                  //       color: Colors.lightBlue,
-                  //       boxShadow: <BoxShadow>[
-                  //         BoxShadow(
-                  //           color: Colors.blue.withOpacity(0.1),
-                  //           blurRadius: 1,
-                  //           offset: Offset(0, 2),
-                  //         ),
-                  //       ],
-                  //     ),
-                  //     alignment: Alignment.center,
-                  //     padding:
-                  //     EdgeInsets.symmetric(vertical: 14, horizontal: 16),
-                  //     width: MediaQuery
-                  //         .of(context)
-                  //         .size
-                  //         .width * 0.8,
-                  //     child: Row(
-                  //       mainAxisAlignment: MainAxisAlignment.center,
-                  //       children: const [
-                  //         Icon(Icons.school_rounded, color: Colors.white),
-                  //         SizedBox(
-                  //           width: 10,
-                  //         ),
-                  //         Text(
-                  //           'Today Attendance',
-                  //           style: TextStyle(color: Colors.white),
-                  //         ),
-                  //       ],
-                  //     ),
-                  //   ),
-                  // ),
+                  InkWell(
+                    onTap: () {
+                      showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: Text(translation(context).logout),
+                              content: Text(translation(context).logout_q),
+                              actions: <Widget>[
+                                FlatButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop(false);
+                                  },
+                                  child: Text(translation(context).not),
+                                ),
+                                FlatButton(
+                                  onPressed: () async {
+                                    SharedPreferences pref =
+                                        await SharedPreferences.getInstance();
+                                    pref.clear();
+                                    Navigator.pushNamedAndRemoveUntil(
+                                        context, "/login", (route) => false);
+                                  },
+                                  child: Text(translation(context).yes),
+                                ),
+                              ],
+                            );
+                          });
+                    },
+                    child: Container(
+                      height: 50,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        color: Colors.grey.shade300,
+                        boxShadow: <BoxShadow>[
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.1),
+                            blurRadius: 1,
+                            offset: Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      alignment: Alignment.center,
+                      padding:
+                          EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+                      width: MediaQuery.of(context).size.width * 0.8,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            translation(context).logout,
+                            style: TextStyle(color: Colors.black),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
                 ],
               ),
             )

@@ -9,16 +9,16 @@ import 'package:shimmer/shimmer.dart';
 import '../../Config/api.dart';
 import '../../l10n/language_constant.dart';
 
-class StudentList extends StatefulWidget {
+class AttendList extends StatefulWidget {
   final List Data;
 
-  const StudentList({Key? key, required this.Data}) : super(key: key);
+  const AttendList({Key? key, required this.Data}) : super(key: key);
 
   @override
-  State<StudentList> createState() => _StudentListState();
+  State<AttendList> createState() => _AttendListState();
 }
 
-class _StudentListState extends State<StudentList> {
+class _AttendListState extends State<AttendList> {
   XFile? image;
   final ImagePicker _picker = ImagePicker();
   final TextEditingController maxWidthController = TextEditingController();
@@ -52,34 +52,20 @@ class _StudentListState extends State<StudentList> {
     if (pickedFile!.path.isNotEmpty) {
       AlertDialog alert1 = AlertDialog(
         title: Text(translation(context).loading,
-            style: TextStyle(color: Colors.green)),
+            style:const TextStyle(color: Colors.green)),
         content: Text(translation(context).child_registering),
       );
       showDialog(
         barrierDismissible: false,
         context: context,
         builder: (BuildContext context) {
-          return Dialog(
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  new CircularProgressIndicator(),
-                  SizedBox(
-                    width: 21,
-                  ),
-                  new Text(translation(context).loading),
-                ],
-              ),
-            ),
-          );
+          return alert1;
         },
       );
     }
     var request = http.MultipartRequest("POST", url);
     request.fields['student'] = name.toString();
-    if (File(pickedFile!.path).exists() != null) {
+    if (File(pickedFile.path).exists() != null) {
       request.files.add(http.MultipartFile(
           'imagefile',
           pickedFile!.readAsBytes().asStream(),
@@ -142,13 +128,15 @@ class _StudentListState extends State<StudentList> {
                   itemBuilder: (context, index) {
                     int ins = index + 1;
                     return Container(
-                      margin: EdgeInsets.fromLTRB(10, 20, 20, 0),
+                      margin: EdgeInsets.fromLTRB(10, 20, 10, 0),
                       padding: EdgeInsets.fromLTRB(0, 10, 0, 5),
                       decoration: BoxDecoration(
                           // color: data[index]["ap"].toString() == "P"
                           //     ? Colors.green[200]
                           //     : Colors.red[200],
-                          color: Colors.white,
+                          color: widget.Data[index]["child_present"] == true
+                              ? Colors.green.shade100
+                              : Colors.red.shade100,
                           boxShadow: [
                             BoxShadow(
                                 blurRadius: 0.2,
@@ -156,6 +144,10 @@ class _StudentListState extends State<StudentList> {
                                 color: Colors.black12,
                                 spreadRadius: 1)
                           ],
+                          border: Border.all(
+                              color: widget.Data[index]["child_present"] == true
+                                  ? Colors.green
+                                  : Colors.red),
                           borderRadius: BorderRadius.circular(5)),
                       child: Container(
                         padding: EdgeInsets.fromLTRB(10, 15, 10, 15),
@@ -176,19 +168,19 @@ class _StudentListState extends State<StudentList> {
                                     image: NetworkImage(
                                       "https://fas.qazna24.kz/static/students/${widget.Data[index]["child_iin"]}.png",
                                     ),
-                                    placeholder: const NetworkImage(
+                                     placeholder: const NetworkImage(
                                       "https://i.gifer.com/origin/d3/d3f472b06590a25cb4372ff289d81711_w200.gif",
                                     ),
                                     imageErrorBuilder:
                                         (context, error, stackTrace) {
                                       return GestureDetector(
                                         onTap: () {
-                                          _onImageButtonPressed(
-                                              ImageSource.camera,
-                                              widget.Data[index]["child_iin"]
-                                                  .toString(),
-                                              context: context,
-                                              imageQuality: 85);
+                                          // _onImageButtonPressed(
+                                          //     ImageSource.camera,
+                                          //     widget.Data[index]["child_iin"]
+                                          //         .toString(),
+                                          //     context: context,
+                                          //     imageQuality: 85);
                                         },
                                         child: Container(
                                           width: 20,
@@ -232,7 +224,7 @@ class _StudentListState extends State<StudentList> {
                                     child: Text(
                                       widget.Data[index]["child_iin"],
                                       style: TextStyle(
-                                          color: Colors.grey,
+                                          color: Colors.black,
                                           fontSize: 12,
                                           fontWeight: FontWeight.w500),
                                     ),

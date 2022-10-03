@@ -72,11 +72,12 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Flutter Demo',
+      title: 'Qazna Biometric',
       // supportedLocales: L10n.all,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       locale: _locale,
+
       theme: ThemeData(
           // primarySwatch: HexColor("#2760ff"),
           primaryColor: HexColor("#2760ff"),

@@ -1,13 +1,17 @@
 import 'dart:convert';
+
 import "package:http/http.dart" as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Api {
-  static var baseUrl =
-      "https://kzo.qaznaonline.kz/kzo/hs/DDO/";
+  static var baseUrl = "https://kzo.qazna24.kz/ddo/hs/DDO/";
   static var client = http.Client();
-  static var mRUrl = "http://157.245.107.107/";
+  static var mRUrl = "https://fas.qazna24.kz/";
+
+  // static var mRUrl = "http://157.245.107.107/";
   static var login = '${baseUrl}auth';
+  static var attend = '${baseUrl}markvisited';
+  static var visited = '${baseUrl}visited';
 
   Future<http.MultipartRequest> request(
       String url, String method, bool urlSlug) async {
