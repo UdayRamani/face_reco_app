@@ -17,9 +17,8 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   @override
   void initState() {
-    // TODO: implement initState
     getDataa();
-    getLocale().then((locale) => {Lng = locale.languageCode});
+    getLocaleName().then((localeName) => {Lng = localeName});
     super.initState();
   }
 
@@ -125,6 +124,7 @@ class _HomeState extends State<Home> {
 
                     Locale _locale = await setLocale(newValue.languageCode);
                     MyApp.setLocale(context, _locale);
+                    await setLocaleName(newValue!.name.toString());
                   },
                 ),
               ),

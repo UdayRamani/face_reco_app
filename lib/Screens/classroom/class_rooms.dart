@@ -68,73 +68,83 @@ class _ClassRoomsState extends State<ClassRooms> {
         ),
         body: Container(
           child: data.isNotEmpty
-              ? ListView.builder(
-                  itemBuilder: (context, index) => GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (BuildContext context) =>
-                                  StudentList(Data: data[index]["child_mass"]),
-                            ),
-                          );
-                        },
-                        child: Container(
-                          margin: EdgeInsets.fromLTRB(10, 10, 10, 0),
-                          padding: EdgeInsets.fromLTRB(0, 10, 0, 5),
-                          decoration: BoxDecoration(
-                              color: Colors.white,
-                              boxShadow: [
-                                BoxShadow(
-                                    blurRadius: 0.2,
-                                    offset: Offset.fromDirection(1),
-                                    color: Colors.black12,
-                                    spreadRadius: 1)
-                              ],
-                              borderRadius: BorderRadius.circular(5)),
-                          child: Container(
-                            padding: EdgeInsets.fromLTRB(20, 10, 10, 10),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Text(
-                                  data[index]["group_name"]
-                                      .toString()
-                                      .toUpperCase(),
-                                  locale:
-                                      Locale.fromSubtags(languageCode: 'ru'),
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 12),
+              ? RefreshIndicator(
+                  onRefresh: () async {
+                    getDataa();
+                  },
+                  child: ListView.builder(
+                      itemBuilder: (context, index) => GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (BuildContext context) =>
+                                      StudentList(
+                                          callRefresh: () {
+                                            getDataa();
+                                          },
+                                          Data: data[index]["child_mass"]),
                                 ),
-                                Container(
-                                  width: 30,
-                                  height: 30,
-                                  alignment: Alignment.center,
-                                  margin: EdgeInsets.fromLTRB(0, 0, 0, 0),
+                              );
+                            },
+                            child: Container(
+                              margin: EdgeInsets.fromLTRB(10, 10, 10, 0),
+                              padding: EdgeInsets.fromLTRB(0, 10, 0, 5),
+                              decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  boxShadow: [
+                                    BoxShadow(
+                                        blurRadius: 0.2,
+                                        offset: Offset.fromDirection(1),
+                                        color: Colors.black12,
+                                        spreadRadius: 1)
+                                  ],
+                                  borderRadius: BorderRadius.circular(5)),
+                              child: Container(
+                                padding: EdgeInsets.fromLTRB(20, 10, 10, 10),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      data[index]["group_name"]
+                                          .toString()
+                                          .toUpperCase(),
+                                      locale: Locale.fromSubtags(
+                                          languageCode: 'ru'),
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 12),
+                                    ),
+                                    Container(
+                                      width: 30,
+                                      height: 30,
+                                      alignment: Alignment.center,
+                                      margin: EdgeInsets.fromLTRB(0, 0, 0, 0),
 
-                                  // padding: EdgeInsets.all(5),
-                                  // decoration: BoxDecoration(
-                                  //     borderRadius:
-                                  //     BorderRadius.circular(30),
-                                  //     color: Colors.redAccent),
-                                  child: Text(
-                                    (data[index]["child_mass"] as List)
-                                        .length
-                                        .toString(),
-                                    style: TextStyle(
-                                        color: HexColor("#2760ff"),
-                                        fontWeight: FontWeight.w800,
-                                        fontSize: 16),
-                                  ),
+                                      // padding: EdgeInsets.all(5),
+                                      // decoration: BoxDecoration(
+                                      //     borderRadius:
+                                      //     BorderRadius.circular(30),
+                                      //     color: Colors.redAccent),
+                                      child: Text(
+                                        (data[index]["child_mass"] as List)
+                                            .length
+                                            .toString(),
+                                        style: TextStyle(
+                                            color: HexColor("#2760ff"),
+                                            fontWeight: FontWeight.w800,
+                                            fontSize: 16),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ],
+                              ),
                             ),
                           ),
-                        ),
-                      ),
-                  itemCount: data.length)
+                      itemCount: data.length),
+                )
               : ListView.builder(
                   itemBuilder: (context, index) {
                     return Shimmer.fromColors(

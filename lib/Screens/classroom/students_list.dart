@@ -11,8 +11,10 @@ import '../../l10n/language_constant.dart';
 
 class StudentList extends StatefulWidget {
   final List Data;
+  final Function callRefresh;
 
-  const StudentList({Key? key, required this.Data}) : super(key: key);
+  const StudentList({Key? key, required this.Data, required this.callRefresh})
+      : super(key: key);
 
   @override
   State<StudentList> createState() => _StudentListState();
@@ -138,114 +140,124 @@ class _StudentListState extends State<StudentList> {
         body: Container(
           margin: EdgeInsets.fromLTRB(0, 0, 0, 10),
           child: widget.Data.isNotEmpty
-              ? ListView.builder(
-                  itemBuilder: (context, index) {
-                    int ins = index + 1;
-                    return Container(
-                      margin: EdgeInsets.fromLTRB(10, 20, 20, 0),
-                      padding: EdgeInsets.fromLTRB(0, 10, 0, 5),
-                      decoration: BoxDecoration(
-                          // color: data[index]["ap"].toString() == "P"
-                          //     ? Colors.green[200]
-                          //     : Colors.red[200],
-                          color: Colors.white,
-                          boxShadow: [
-                            BoxShadow(
-                                blurRadius: 0.2,
-                                offset: Offset.fromDirection(1),
-                                color: Colors.black12,
-                                spreadRadius: 1)
-                          ],
-                          borderRadius: BorderRadius.circular(5)),
-                      child: Container(
-                        padding: EdgeInsets.fromLTRB(10, 15, 10, 15),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Container(
-                                width: 50,
-                                height: 50,
-                                margin: EdgeInsets.fromLTRB(0, 0, 25, 0),
-                                decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(10)),
-                                // child: Icon(Icons.camera_alt)
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(8.0),
-                                  child: FadeInImage(
-                                    image: NetworkImage(
-                                      "https://fas.qazna24.kz/static/students/${widget.Data[index]["child_iin"]}.png",
-                                    ),
-                                    placeholder: const NetworkImage(
-                                      "https://i.gifer.com/origin/d3/d3f472b06590a25cb4372ff289d81711_w200.gif",
-                                    ),
-                                    imageErrorBuilder:
-                                        (context, error, stackTrace) {
-                                      return GestureDetector(
-                                        onTap: () {
-                                          _onImageButtonPressed(
-                                              ImageSource.camera,
-                                              widget.Data[index]["child_iin"]
-                                                  .toString(),
-                                              context: context,
-                                              imageQuality: 85);
-                                        },
-                                        child: Container(
-                                          width: 20,
-                                          height: 20,
-                                          padding: EdgeInsets.all(5),
-                                          decoration: BoxDecoration(
-                                              color: Colors.white,
-                                              border: Border.all(
-                                                  color: Colors.black),
-                                              borderRadius:
-                                                  BorderRadius.circular(50)),
-                                          child: Image.network(
-                                            'https://img.icons8.com/ios-glyphs/480/camera--v1.png',
-                                            filterQuality: FilterQuality.medium,
-                                            width: 20,
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                    fit: BoxFit.fitWidth,
-                                  ),
-                                )),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Container(
-                                    child: Text(
-                                      widget.Data[index]["child_name"]
-                                          .toString()
-                                          .toUpperCase(),
-                                      overflow: TextOverflow.fade,
-                                      style: TextStyle(
-                                          color: Colors.black,
-                                          fontWeight: FontWeight.w500,
-                                          fontSize: 13),
-                                    ),
-                                  ),
-                                  Container(
-                                    margin: EdgeInsets.fromLTRB(0, 6, 0, 0),
-                                    child: Text(
-                                      widget.Data[index]["child_iin"],
-                                      style: TextStyle(
-                                          color: Colors.grey,
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w500),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
+              ? RefreshIndicator(
+                  onRefresh: () async {
+                    widget.callRefresh();
                   },
-                  itemCount: widget.Data.length)
+                  child: ListView.builder(
+                      itemBuilder: (context, index) {
+                        int ins = index + 1;
+                        return Container(
+                          margin: EdgeInsets.fromLTRB(10, 20, 20, 0),
+                          padding: EdgeInsets.fromLTRB(0, 10, 0, 5),
+                          decoration: BoxDecoration(
+                              // color: data[index]["ap"].toString() == "P"
+                              //     ? Colors.green[200]
+                              //     : Colors.red[200],
+                              color: Colors.white,
+                              boxShadow: [
+                                BoxShadow(
+                                    blurRadius: 0.2,
+                                    offset: Offset.fromDirection(1),
+                                    color: Colors.black12,
+                                    spreadRadius: 1)
+                              ],
+                              borderRadius: BorderRadius.circular(5)),
+                          child: Container(
+                            padding: EdgeInsets.fromLTRB(10, 15, 10, 15),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Container(
+                                    width: 50,
+                                    height: 50,
+                                    margin: EdgeInsets.fromLTRB(0, 0, 25, 0),
+                                    decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius:
+                                            BorderRadius.circular(10)),
+                                    // child: Icon(Icons.camera_alt)
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(8.0),
+                                      child: FadeInImage(
+                                        image: NetworkImage(
+                                          "https://fas.qazna24.kz/static/students/${widget.Data[index]["child_iin"]}.png",
+                                        ),
+                                        placeholder: const NetworkImage(
+                                          "https://i.gifer.com/origin/d3/d3f472b06590a25cb4372ff289d81711_w200.gif",
+                                        ),
+                                        imageErrorBuilder:
+                                            (context, error, stackTrace) {
+                                          return GestureDetector(
+                                            onTap: () {
+                                              _onImageButtonPressed(
+                                                  ImageSource.camera,
+                                                  widget.Data[index]
+                                                          ["child_iin"]
+                                                      .toString(),
+                                                  context: context,
+                                                  imageQuality: 85);
+                                            },
+                                            child: Container(
+                                              width: 20,
+                                              height: 20,
+                                              padding: EdgeInsets.all(5),
+                                              decoration: BoxDecoration(
+                                                  color: Colors.white,
+                                                  border: Border.all(
+                                                      color: Colors.black),
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          50)),
+                                              child: Image.network(
+                                                'https://img.icons8.com/ios-glyphs/480/camera--v1.png',
+                                                filterQuality:
+                                                    FilterQuality.medium,
+                                                width: 20,
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                        fit: BoxFit.fitWidth,
+                                      ),
+                                    )),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Container(
+                                        child: Text(
+                                          widget.Data[index]["child_name"]
+                                              .toString()
+                                              .toUpperCase(),
+                                          overflow: TextOverflow.fade,
+                                          style: TextStyle(
+                                              color: Colors.black,
+                                              fontWeight: FontWeight.w500,
+                                              fontSize: 13),
+                                        ),
+                                      ),
+                                      Container(
+                                        margin: EdgeInsets.fromLTRB(0, 6, 0, 0),
+                                        child: Text(
+                                          widget.Data[index]["child_iin"],
+                                          style: TextStyle(
+                                              color: Colors.grey,
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w500),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                      itemCount: widget.Data.length),
+                )
               : ListView.builder(
                   itemBuilder: (context, index) {
                     return Shimmer.fromColors(

@@ -1,8 +1,6 @@
 import 'dart:convert';
-
 import "package:http/http.dart" as http;
 import 'package:shared_preferences/shared_preferences.dart';
-
 class Api {
   static var baseUrl = "https://kzo.qazna24.kz/ddo/hs/DDO/";
   static var client = http.Client();

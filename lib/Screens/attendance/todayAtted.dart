@@ -361,6 +361,7 @@ class _TodayAttedState extends State<TodayAtted> {
         ]
       }
     ]);
+
     // Dio dio = Dio();
     // // dio.options.headers['Authorization'] = basicAuth;
     // var response = await dio.post(
@@ -371,11 +372,11 @@ class _TodayAttedState extends State<TodayAtted> {
     //   ),
     // );
     // print(response.data);
+
     request.headers.addAll(headers);
     http.StreamedResponse response = await request.send();
     var responseBody = await http.Response.fromStream(response);
     // var ress=json.decode(responseBody.body);
-
     // print(Api().getBody(responseBody));
     if (response.statusCode == 200) {
       _onLoading(false);
