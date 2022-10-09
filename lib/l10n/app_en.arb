@@ -30,5 +30,10 @@
    "logout_q":"Do you want to Logout?",
    "not":"Not",
    "yes":"yes",
-   "children":"Children"
+   "children":"Children",
+   "saveatted":"Save sheeting",
+   "success_text":"Success!",
+   "success_text_subtitle":"We recognized the children",
+   "save_record_btn":"Save sheeting"
+
 }

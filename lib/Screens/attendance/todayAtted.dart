@@ -1,10 +1,14 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:hexcolor/hexcolor.dart';
 import "package:http/http.dart" as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:localstorage/localstorage.dart';
+import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -41,11 +45,15 @@ class _TodayAttedState extends State<TodayAtted> {
   bool checkLoaderForAttend = false;
 
   var FinalData = [];
+  var FinalDataCountGreen = [];
+  double progress = 0.0;
+  double progressText = 0.0;
 
   @override
   void initState() {
     // TODO: implement initState
     getDatas();
+
     super.initState();
   }
 
@@ -84,6 +92,27 @@ class _TodayAttedState extends State<TodayAtted> {
     }
   }
 
+  Timer? _timer;
+  int _start = 10;
+
+  void startTimer() {
+    const oneSec = const Duration(seconds: 1);
+    _timer = Timer.periodic(
+      oneSec,
+      (Timer timer) {
+        if (_start == 0) {
+          setState(() {
+            timer.cancel();
+          });
+        } else {
+          setState(() {
+            _start++;
+          });
+        }
+      },
+    );
+  }
+
   Future<void> _onImageButtonPressed(
     ImageSource source, {
     required BuildContext context,
@@ -108,10 +137,28 @@ class _TodayAttedState extends State<TodayAtted> {
       imageQuality: 20,
     );
     print(pickedFile!.length());
-
-    _onLoading(true);
+    // _onLoading(true);
     var url = Uri.parse("${Api.mRUrl}attendanceapi");
     print(url);
+    String fileName = pickedFile.path.split('/').last;
+
+    FormData formData = FormData.fromMap({
+      "imagefile":
+          await MultipartFile.fromFile(pickedFile.path, filename: fileName),
+    });
+
+    Dio dio = Dio();
+    await dio.post(
+      url.toString(),
+      data: formData,
+      onSendProgress: (int sent, int total) {
+        print(
+            'progress: ${(sent / total * 100).toStringAsFixed(0)} ($sent/$total)');
+        progress = (sent / total * 100) / 100;
+        progressText = (sent / total * 100);
+        setState(() {});
+      },
+    );
     var request = http.MultipartRequest("POST", url);
     if (File(pickedFile.path).exists() != null) {
       request.files.add(http.MultipartFile(
@@ -121,15 +168,37 @@ class _TodayAttedState extends State<TodayAtted> {
           filename:
               DateTime.now().toString() + pickedFile.path.split("/").last));
     }
+
     var responses = await request.send();
     var responseBody = await http.Response.fromStream(responses);
     var jsonMap = json.decode(responseBody.body);
+    // responses.stream.transform(utf8.decoder).listen((value) {
+    //   print(value);
+    // });
+
+    // Dio dio = Dio();
+    // var responseDio = await dio.post(
+    //   url.toString(),
+    //   data: formData,
+    //   onSendProgress: (int sent, int total) {
+    //     print(
+    //         'progress: ${(sent / total * 100).toStringAsFixed(0)} ($sent/$total)');
+    //     progress = (sent / total * 100) / 100;
+    //     progressText = (sent / total * 100);
+    //     setState(() {});
+    //   },
+    // );
+    // print(json.decode(responseDio.data));
+
+    print(jsonMap["Status"].toString());
 
     if (jsonMap["Status"] == 200) {
-      _onLoading(false);
+      // _onLoading(false);
+
+      progress = 0.0;
+      progressText = 0.0;
 
       checkLoaderForAttend = false;
-
       _save((jsonMap["St_ids"] as List));
 
       Widget okButton = TextButton(
@@ -141,17 +210,22 @@ class _TodayAttedState extends State<TodayAtted> {
 
       Widget okButton1 = TextButton(
         child: Text(
-          translation(context).new_attendance,
+          translation(context).saveatted,
         ),
         onPressed: () {
-          _onImageButtonPressed(ImageSource.camera,
-              context: context, imageQuality: 85);
+          Attendnce();
+
+          // _onImageButtonPressed(ImageSource.camera,
+          //     context: context, imageQuality: 85);
         },
       );
 
       AlertDialog alert = AlertDialog(
-        title: Text(translation(context).successfully,
-            style: TextStyle(color: Colors.green)),
+        title: Text(
+          translation(context).successfully,
+          style: TextStyle(color: Colors.green),
+          textAlign: TextAlign.center,
+        ),
         content: Text(translation(context).we_got_to_know_the_children),
         actions: [
           okButton,
@@ -162,11 +236,16 @@ class _TodayAttedState extends State<TodayAtted> {
         barrierDismissible: false,
         context: context,
         builder: (BuildContext context) {
-          return alert;
+          return CustomeDailog(
+            callback: () => Attendnce(),
+          );
         },
       );
     } else {
-      _onLoading(false);
+      setState(() {
+        progress = 0.0;
+      });
+      // _onLoading(false);
       setState(() {
         checkLoaderForAttend = false;
       });
@@ -265,6 +344,10 @@ class _TodayAttedState extends State<TodayAtted> {
     print(data);
     // FinalData.clear();
     Datass.addAll(data);
+    setState(() {
+      progress = 0.0;
+      progressText = 0.0;
+    });
     for (var d = 0; d < FinalData.length; d++) {
       for (var e in data) {
         print(d);
@@ -276,6 +359,7 @@ class _TodayAttedState extends State<TodayAtted> {
             "child_present": FinalData[d]["child_present"].toString(),
             "color": "green"
           };
+          // FinalDataCountGreen[d] = {"color": "green"};
         }
         // if (e.toString() != d["child_iin"].toString()) {
         //   FinalData.add({
@@ -362,16 +446,6 @@ class _TodayAttedState extends State<TodayAtted> {
       }
     ]);
 
-    // Dio dio = Dio();
-    // // dio.options.headers['Authorization'] = basicAuth;
-    // var response = await dio.post(
-    //   Uri.parse('https://kzo.qaznaonline.kz/kzo/hs/DDO/visited').toString(),
-    //   data: data,
-    //   options: Options(
-    //     headers: {'Authorization': basicAuth},
-    //   ),
-    // );
-    // print(response.data);
 
     request.headers.addAll(headers);
     http.StreamedResponse response = await request.send();
@@ -383,7 +457,19 @@ class _TodayAttedState extends State<TodayAtted> {
       Widget okButton = TextButton(
         child: Text(translation(context).okay),
         onPressed: () {
+          widget.callBack();
+          // FinalData.clear();
+          Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                  builder: (BuildContext context) => super.widget));
           Navigator.pop(context);
+          Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                  builder: (BuildContext context) => super.widget));
+
+          // Navigator.pop(context);
           Datass.clear();
           finaldisplayDataWithName.clear();
           setState(() {});
@@ -439,22 +525,22 @@ class _TodayAttedState extends State<TodayAtted> {
             //       padding: EdgeInsets.all(8.0),
             //       child: Icon(Icons.list_alt_rounded),
             //     )),
-            GestureDetector(
-                onTap: () {
-                  // if (Datass.isEmpty) {
-                  //   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                  //       backgroundColor: Colors.red,
-                  //       content: Text(
-                  //         translation(context).atten_empty,
-                  //       )));
-                  // } else {
-                  Attendnce();
-                  // }
-                },
-                child: const Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: Icon(Icons.save),
-                ))
+            // GestureDetector(
+            //     onTap: () {
+            //       // if (Datass.isEmpty) {
+            //       //   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            //       //       backgroundColor: Colors.red,
+            //       //       content: Text(
+            //       //         translation(context).atten_empty,
+            //       //       )));
+            //       // } else {
+            //       Attendnce();
+            //       // }
+            //     },
+            //     child: const Padding(
+            //       padding: EdgeInsets.all(8.0),
+            //       child: Icon(Icons.save),
+            //     ))
           ],
         ),
         floatingActionButton: checkLoaderForAttend
@@ -463,7 +549,7 @@ class _TodayAttedState extends State<TodayAtted> {
                     // color: data[index]["ap"].toString() == "P"
                     //     ? Colors.green[200]
                     //     : Colors.red[200],
-                    color: Colors.blue,
+                    color: Colors.white,
                     boxShadow: [
                       BoxShadow(
                           blurRadius: 0.2,
@@ -503,185 +589,313 @@ class _TodayAttedState extends State<TodayAtted> {
                         size: 35,
                       ),
                     ))),
-        body: Container(
-          color: Colors.white,
-          margin: EdgeInsets.fromLTRB(0, 0, 0, 10),
-          child: FinalData.isNotEmpty
-              ? ListView.builder(
-                  itemBuilder: (context, index) {
-                    return Container(
-                      margin: const EdgeInsets.fromLTRB(10, 20, 10, 0),
-                      padding: const EdgeInsets.fromLTRB(0, 10, 0, 5),
-                      decoration: BoxDecoration(
-                          // color: data[index]["ap"].toString() == "P"
-                          //     ? Colors.green[200]
-                          //     : Colors.red[200],
-                          color: FinalData[index]["color"] == "green"
-                              ? Colors.green.shade100
-                              : FinalData[index]["color"] == "red"
-                                  ? Colors.red.shade100
-                                  : Colors.white,
-                          boxShadow: [
-                            BoxShadow(
-                                blurRadius: 0.2,
-                                offset: Offset.fromDirection(1),
-                                color: Colors.black12,
-                                spreadRadius: 1)
-                          ],
-                          border: Border.all(
-                              color: FinalData[index]["color"] == "green"
-                                  ? Colors.green
-                                  : FinalData[index]["color"] == "red"
-                                      ? Colors.red
-                                      : Colors.grey),
-                          borderRadius: BorderRadius.circular(5)),
-                      // decoration: FinalData[index]["color"] == "gray"
-                      //     ? BoxDecoration(
-                      //         border: Border.all(color: Colors.grey.shade300),
-                      //         borderRadius: BorderRadius.circular(5))
-                      //     : BoxDecoration(
-                      //         // color: data[index]["ap"].toString() == "P"
-                      //         //     ? Colors.green[200]
-                      //         //     : Colors.red[200],
-                      //         color: FinalData[index]["color"] == "green"
-                      //             ? Colors.green.shade100
-                      //             : FinalData[index]["color"] == "red"
-                      //                 ? Colors.red.shade100
-                      //                 : Colors.white,
-                      //         boxShadow: [
-                      //           BoxShadow(
-                      //               blurRadius: 0.2,
-                      //               offset: Offset.fromDirection(1),
-                      //               color: Colors.black12,
-                      //               spreadRadius: 1)
-                      //         ],
-                      //         border: Border.all(
-                      //             color: FinalData[index]["color"] == "green"
-                      //                 ? Colors.green
-                      //                 : FinalData[index]["color"] == "red"
-                      //                     ? Colors.red
-                      //                     : Colors.grey),
-                      //         borderRadius: BorderRadius.circular(5)),
-                      child: Container(
-                        padding: const EdgeInsets.fromLTRB(10, 15, 10, 15),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            // Container(
-                            //     width: 50,
-                            //     height: 50,
-                            //     margin: const EdgeInsets.fromLTRB(0, 0, 25, 0),
-                            //     decoration: BoxDecoration(
-                            //         color: Colors.white,
-                            //         borderRadius: BorderRadius.circular(10)),
-                            //     // child: Icon(Icons.camera_alt)
-                            //     child: ClipRRect(
-                            //       borderRadius: BorderRadius.circular(8.0),
-                            //       child: FadeInImage(
-                            //         image: NetworkImage(
-                            //           "https://fas.qazna24.kz/static/students/${FinalData[index]["child_iin"]}.png",
-                            //         ),
-                            //         placeholder: const NetworkImage(
-                            //           "https://i.gifer.com/origin/d3/d3f472b06590a25cb4372ff289d81711_w200.gif",
-                            //         ),
-                            //         imageErrorBuilder:
-                            //             (context, error, stackTrace) {
-                            //           return GestureDetector(
-                            //             onTap: () {
-                            //               // _onImageButtonPressed(
-                            //               //     ImageSource.camera,
-                            //               //     widget.Data[index]["child_iin"]
-                            //               //         .toString(),
-                            //               //     context: context,
-                            //               //     imageQuality: 85);
-                            //             },
-                            //             child: Container(
-                            //               width: 20,
-                            //               height: 20,
-                            //               padding: EdgeInsets.all(5),
-                            //               decoration: BoxDecoration(
-                            //                   color: Colors.white,
-                            //                   border: Border.all(
-                            //                       color: Colors.grey.shade300),
-                            //                   borderRadius:
-                            //                       BorderRadius.circular(50)),
-                            //               child: Image.network(
-                            //                 'https://img.icons8.com/ios-glyphs/480/camera--v1.png',
-                            //                 filterQuality: FilterQuality.medium,
-                            //                 color: Colors.grey,
-                            //                 width: 20,
-                            //               ),
-                            //             ),
-                            //           );
-                            //         },
-                            //         fit: BoxFit.fitWidth,
-                            //       ),
-                            //     )),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    FinalData[index]["child_name"]
-                                        .toString()
-                                        .toUpperCase(),
-                                    overflow: TextOverflow.fade,
-                                    style: TextStyle(
-                                        // color: FinalData[index]["color"] ==
-                                        //         "gray"
-                                        //     ? Colors.grey.shade400
-                                        //     : Colors.black,
-                                        color: Colors.black,
-                                        fontWeight: FontWeight.w500,
-                                        fontSize: 13),
-                                  ),
-                                  Container(
-                                    margin: EdgeInsets.fromLTRB(0, 6, 0, 0),
-                                    child: Text(
-                                      FinalData[index]["child_iin"],
-                                      style: TextStyle(
-                                          // color: FinalData[index]["color"] ==
-                                          //         "gray"
-                                          //     ? Colors.grey.shade300
-                                          //     : Colors.black,
-                                          color: Colors.black,
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w500),
+        body: Stack(
+          children: [
+            Container(
+              color: Colors.white,
+              margin: EdgeInsets.fromLTRB(0, 0, 0, 10),
+              child: FinalData.isNotEmpty
+                  ? RefreshIndicator(
+                      onRefresh: () async {
+                        widget.callBack();
+                      },
+                      child: ListView.builder(
+                          itemBuilder: (context, index) {
+                            return Container(
+                              margin: const EdgeInsets.fromLTRB(10, 20, 10, 0),
+                              padding: const EdgeInsets.fromLTRB(0, 10, 0, 5),
+                              decoration: BoxDecoration(
+                                  // color: data[index]["ap"].toString() == "P"
+                                  //     ? Colors.green[200]
+                                  //     : Colors.red[200],
+                                  color: FinalData[index]["color"] == "green"
+                                      ? Colors.green.shade100
+                                      : FinalData[index]["color"] == "red"
+                                          ? Colors.red.shade100
+                                          : Colors.white,
+                                  boxShadow: [
+                                    BoxShadow(
+                                        blurRadius: 0.2,
+                                        offset: Offset.fromDirection(1),
+                                        color: Colors.black12,
+                                        spreadRadius: 1)
+                                  ],
+                                  border: Border.all(
+                                      color: FinalData[index]["color"] ==
+                                              "green"
+                                          ? Colors.green
+                                          : FinalData[index]["color"] == "red"
+                                              ? Colors.red
+                                              : Colors.grey),
+                                  borderRadius: BorderRadius.circular(5)),
+                              // decoration: FinalData[index]["color"] == "gray"
+                              //     ? BoxDecoration(
+                              //         border: Border.all(color: Colors.grey.shade300),
+                              //         borderRadius: BorderRadius.circular(5))
+                              //     : BoxDecoration(
+                              //         // color: data[index]["ap"].toString() == "P"
+                              //         //     ? Colors.green[200]
+                              //         //     : Colors.red[200],
+                              //         color: FinalData[index]["color"] == "green"
+                              //             ? Colors.green.shade100
+                              //             : FinalData[index]["color"] == "red"
+                              //                 ? Colors.red.shade100
+                              //                 : Colors.white,
+                              //         boxShadow: [
+                              //           BoxShadow(
+                              //               blurRadius: 0.2,
+                              //               offset: Offset.fromDirection(1),
+                              //               color: Colors.black12,
+                              //               spreadRadius: 1)
+                              //         ],
+                              //         border: Border.all(
+                              //             color: FinalData[index]["color"] == "green"
+                              //                 ? Colors.green
+                              //                 : FinalData[index]["color"] == "red"
+                              //                     ? Colors.red
+                              //                     : Colors.grey),
+                              //         borderRadius: BorderRadius.circular(5)),
+                              child: Container(
+                                padding:
+                                    const EdgeInsets.fromLTRB(10, 15, 10, 15),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    // Container(
+                                    //     width: 50,
+                                    //     height: 50,
+                                    //     margin: const EdgeInsets.fromLTRB(0, 0, 25, 0),
+                                    //     decoration: BoxDecoration(
+                                    //         color: Colors.white,
+                                    //         borderRadius: BorderRadius.circular(10)),
+                                    //     // child: Icon(Icons.camera_alt)
+                                    //     child: ClipRRect(
+                                    //       borderRadius: BorderRadius.circular(8.0),
+                                    //       child: FadeInImage(
+                                    //         image: NetworkImage(
+                                    //           "https://fas.qazna24.kz/static/students/${FinalData[index]["child_iin"]}.png",
+                                    //         ),
+                                    //         placeholder: const NetworkImage(
+                                    //           "https://i.gifer.com/origin/d3/d3f472b06590a25cb4372ff289d81711_w200.gif",
+                                    //         ),
+                                    //         imageErrorBuilder:
+                                    //             (context, error, stackTrace) {
+                                    //           return GestureDetector(
+                                    //             onTap: () {
+                                    //               // _onImageButtonPressed(
+                                    //               //     ImageSource.camera,
+                                    //               //     widget.Data[index]["child_iin"]
+                                    //               //         .toString(),
+                                    //               //     context: context,
+                                    //               //     imageQuality: 85);
+                                    //             },
+                                    //             child: Container(
+                                    //               width: 20,
+                                    //               height: 20,
+                                    //               padding: EdgeInsets.all(5),
+                                    //               decoration: BoxDecoration(
+                                    //                   color: Colors.white,
+                                    //                   border: Border.all(
+                                    //                       color: Colors.grey.shade300),
+                                    //                   borderRadius:
+                                    //                       BorderRadius.circular(50)),
+                                    //               child: Image.network(
+                                    //                 'https://img.icons8.com/ios-glyphs/480/camera--v1.png',
+                                    //                 filterQuality: FilterQuality.medium,
+                                    //                 color: Colors.grey,
+                                    //                 width: 20,
+                                    //               ),
+                                    //             ),
+                                    //           );
+                                    //         },
+                                    //         fit: BoxFit.fitWidth,
+                                    //       ),
+                                    //     )),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            FinalData[index]["child_name"]
+                                                .toString()
+                                                .toUpperCase(),
+                                            overflow: TextOverflow.fade,
+                                            style: TextStyle(
+                                                // color: FinalData[index]["color"] ==
+                                                //         "gray"
+                                                //     ? Colors.grey.shade400
+                                                //     : Colors.black,
+                                                color: Colors.black,
+                                                fontWeight: FontWeight.w500,
+                                                fontSize: 13),
+                                          ),
+                                          Container(
+                                            margin:
+                                                EdgeInsets.fromLTRB(0, 6, 0, 0),
+                                            child: Text(
+                                              FinalData[index]["child_iin"],
+                                              style: TextStyle(
+                                                  // color: FinalData[index]["color"] ==
+                                                  //         "gray"
+                                                  //     ? Colors.grey.shade300
+                                                  //     : Colors.black,
+                                                  color: Colors.black,
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.w500),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
+                            );
+                          },
+                          itemCount: FinalData.length),
+                    )
+                  : ListView.builder(
+                      itemBuilder: (context, index) {
+                        return Shimmer.fromColors(
+                            baseColor: Colors.grey.shade400,
+                            highlightColor: Colors.black12,
+                            child: Container(
+                              margin: const EdgeInsets.fromLTRB(10, 10, 10, 0),
+                              padding: const EdgeInsets.fromLTRB(0, 10, 0, 5),
+                              height: 70,
+                              decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  boxShadow: [
+                                    BoxShadow(
+                                        blurRadius: 0.2,
+                                        offset: Offset.fromDirection(1),
+                                        color: Colors.black12,
+                                        spreadRadius: 1)
+                                  ],
+                                  borderRadius: BorderRadius.circular(5)),
+                              width: double.infinity,
+                            ));
+                      },
+                      itemCount: 20),
+            ),
+            progress != 0.0
+                ? Container(
+                    color: Colors.black12,
+                    child: Center(
+                      child: Container(
+                        decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(10)),
+                        height: 70,
+                        margin: const EdgeInsets.fromLTRB(30, 0, 30, 0),
+                        child: Column(
+                          children: [
+                            const SizedBox(
+                              height: 10,
+                            ),
+                            Text(translation(context).loading),
+                            const SizedBox(
+                              height: 10,
+                            ),
+                            LinearPercentIndicator(
+                              lineHeight: 14.0,
+                              percent: progress,
+                              center: Text(progressText.toString()),
+                              backgroundColor: Colors.grey,
+                              progressColor: Colors.blue,
                             ),
                           ],
                         ),
                       ),
-                    );
-                  },
-                  itemCount: FinalData.length)
-              : ListView.builder(
-                  itemBuilder: (context, index) {
-                    return Shimmer.fromColors(
-                        baseColor: Colors.grey.shade400,
-                        highlightColor: Colors.black12,
-                        child: Container(
-                          margin: const EdgeInsets.fromLTRB(10, 10, 10, 0),
-                          padding: const EdgeInsets.fromLTRB(0, 10, 0, 5),
-                          height: 70,
-                          decoration: BoxDecoration(
-                              color: Colors.white,
-                              boxShadow: [
-                                BoxShadow(
-                                    blurRadius: 0.2,
-                                    offset: Offset.fromDirection(1),
-                                    color: Colors.black12,
-                                    spreadRadius: 1)
-                              ],
-                              borderRadius: BorderRadius.circular(5)),
-                          width: double.infinity,
-                        ));
-                  },
-                  itemCount: 20),
+                    ))
+                : Container(),
+          ],
         ));
+  }
+}
+
+class CustomeDailog extends StatelessWidget {
+  final Function callback;
+
+  const CustomeDailog({Key? key, required this.callback}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      elevation: 0,
+      backgroundColor: Color(0xffffffff),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(15.0),
+      ),
+      child: Container(
+        margin: EdgeInsets.fromLTRB(10, 0, 10, 0),
+        height: 170,
+        width: double.infinity,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          color: Colors.white,
+        ),
+        child: Column(children: [
+          SizedBox(
+            height: 25,
+          ),
+          Text(translation(context).success_text,
+              style: TextStyle(color: Colors.green, fontSize: 20)),
+          SizedBox(
+            height: 10,
+          ),
+          Text(
+            translation(context).success_text_subtitle,
+            style: TextStyle(color: Colors.grey),
+          ),
+          SizedBox(
+            height: 25,
+          ),
+          Row(
+            children: [
+              Expanded(
+                flex: 1,
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.pop(context);
+                  },
+                  child: Container(
+                      margin: EdgeInsets.fromLTRB(30, 0, 5, 10),
+                      height: 40,
+                      child: Center(
+                          child: Text(translation(context).okay,
+                              style: TextStyle(color: Colors.white))),
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          color: Colors.grey)),
+                ),
+              ),
+              Expanded(
+                flex: 2,
+                child: GestureDetector(
+                  onTap: () {
+                    callback();
+                  },
+                  child: Container(
+                      margin: EdgeInsets.fromLTRB(5, 0, 30, 10),
+                      height: 40,
+                      child: Center(
+                          child: Text(
+                        translation(context).save_record_btn,
+                        style: TextStyle(color: Colors.white),
+                      )),
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          color: HexColor("#2760ff"))),
+                ),
+              ),
+            ],
+          )
+        ]),
+      ),
+    );
   }
 }
 

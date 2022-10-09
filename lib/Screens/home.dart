@@ -1,7 +1,6 @@
 import 'package:face_detaction_app/Screens/attendance/group_list_atted.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import '../l10n/language_constant.dart';
 import '../l10n/languagess.dart';
 import '../main.dart';
@@ -137,7 +136,7 @@ class _HomeState extends State<Home> {
           child: Column(children: [
             Expanded(
               child: Container(
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                     color: Colors.white,
                     image: DecorationImage(
                         image: AssetImage("assets/dashboard.gif"))),

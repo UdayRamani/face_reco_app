@@ -65,7 +65,7 @@ class _GroupListAttendState extends State<GroupListAttend> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text(translation(context).class_room),
+          title: Text(translation(context).attendance_btn_home),
           centerTitle: true,
         ),
         body: Container(

@@ -30,6 +30,12 @@
     "logout_q":"Вы хотите выйти?",
     "not":"Нет",
     "yes":"Да",
-     "children":"Дети"
+    "children":"Дети",
+    "saveatted":"Табельді сақтау",
+    "success_text":"Успешно!",
+    "success_text_subtitle":"Мы распознали детей!",
+    "save_record_btn":"Заполнить табель"
+
+
 
 }

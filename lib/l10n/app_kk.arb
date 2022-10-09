@@ -30,5 +30,12 @@
    "logout_q":"Шыққыңыз келе ме?",
    "not":"Жоқ",
    "yes":"Иә",
-   "children":"Балалар"
+   "children":"Балалар",
+   "saveatted":"Табельді сақтау",
+   "success_text":"Сәтті!",
+   "success_text_subtitle":"Балалар сәтті танылды!",
+   "save_record_btn":"Табельді сақтау"
+
+
+
 }

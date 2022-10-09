@@ -1,4 +1,4 @@
-package com.example.face_detaction_app;
+package com.jsoft.qaznabio;
 
 import io.flutter.embedding.android.FlutterActivity;
 
