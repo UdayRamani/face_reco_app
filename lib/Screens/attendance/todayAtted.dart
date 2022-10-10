@@ -145,6 +145,8 @@ class _TodayAttedState extends State<TodayAtted> {
     FormData formData = FormData.fromMap({
       "imagefile":
           await MultipartFile.fromFile(pickedFile.path, filename: fileName),
+      "org_id": widget.org_ID,
+      "group_id": widget.group_ID,
     });
 
     Dio dio = Dio();
@@ -168,6 +170,8 @@ class _TodayAttedState extends State<TodayAtted> {
           filename:
               DateTime.now().toString() + pickedFile.path.split("/").last));
     }
+    request.fields['org_id'] = widget.org_ID.toString();
+    request.fields['group_id'] = widget.group_ID.toString();
 
     var responses = await request.send();
     var responseBody = await http.Response.fromStream(responses);

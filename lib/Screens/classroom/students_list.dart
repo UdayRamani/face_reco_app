@@ -11,8 +11,15 @@ import '../../l10n/language_constant.dart';
 class StudentList extends StatefulWidget {
   final List Data;
   final Function callRefresh;
+  final String orgId;
+  final String groupId;
 
-  const StudentList({Key? key, required this.Data, required this.callRefresh})
+  const StudentList(
+      {Key? key,
+      required this.Data,
+      required this.callRefresh,
+      required this.orgId,
+      required this.groupId})
       : super(key: key);
 
   @override
@@ -53,14 +60,21 @@ class _StudentListState extends State<StudentList> {
       maxHeight: height,
       imageQuality: 50,
     );
-
+    print({
+      "imagefile": "",
+      "student": name.toString(),
+      "org_id": widget.orgId,
+      "group_id": widget.groupId
+    });
     var url = Uri.parse("${Api.mRUrl}registerapi");
     print(url);
     String fileName = pickedFile!.path.split('/').last;
     FormData formData = FormData.fromMap({
       "imagefile":
           await MultipartFile.fromFile(pickedFile.path, filename: fileName),
-      "student": name.toString()
+      "student": name.toString(),
+      // "org_id": widget.orgId,
+      // "group_id": widget.groupId
     });
     Dio dio = Dio();
     var response = await dio.post(
@@ -212,57 +226,153 @@ class _StudentListState extends State<StudentList> {
                                   Container(
                                       width: 50,
                                       height: 50,
-                                      margin: EdgeInsets.fromLTRB(0, 0, 25, 0),
+                                      margin: EdgeInsets.fromLTRB(0, 0, 5, 0),
                                       decoration: BoxDecoration(
                                           color: Colors.white,
                                           borderRadius:
                                               BorderRadius.circular(10)),
                                       // child: Icon(Icons.camera_alt)
                                       child: ClipRRect(
-                                        borderRadius:
-                                            BorderRadius.circular(8.0),
-                                        child: FadeInImage(
-                                          image: NetworkImage(
-                                            "https://fas.qazna24.kz/static/students/${widget.Data[index]["child_iin"]}.png",
-                                          ),
-                                          placeholder: const NetworkImage(
-                                            "https://i.gifer.com/origin/d3/d3f472b06590a25cb4372ff289d81711_w200.gif",
-                                          ),
-                                          imageErrorBuilder:
-                                              (context, error, stackTrace) {
-                                            return GestureDetector(
-                                              onTap: () {
-                                                _onImageButtonPressed(
-                                                    ImageSource.camera,
-                                                    widget.Data[index]
-                                                            ["child_iin"]
-                                                        .toString(),
-                                                    context: context,
-                                                    imageQuality: 85);
-                                              },
-                                              child: Container(
-                                                width: 20,
-                                                height: 20,
-                                                padding: EdgeInsets.all(5),
-                                                decoration: BoxDecoration(
-                                                    color: Colors.white,
-                                                    border: Border.all(
-                                                        color: Colors.black),
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            50)),
-                                                child: Image.network(
-                                                  'https://img.icons8.com/ios-glyphs/480/camera--v1.png',
-                                                  filterQuality:
-                                                      FilterQuality.medium,
+                                          borderRadius:
+                                              BorderRadius.circular(8.0),
+                                          child: Image.network(
+                                            "https://fas.qazna24.kz/static/students/${widget.orgId}/${widget.groupId}/${widget.Data[index]["child_iin"]}.png",
+                                            errorBuilder:
+                                                (context, error, stackTrace) {
+                                              return GestureDetector(
+                                                onTap: () {
+                                                  _onImageButtonPressed(
+                                                      ImageSource.camera,
+                                                      widget.Data[index]
+                                                              ["child_iin"]
+                                                          .toString(),
+                                                      context: context,
+                                                      imageQuality: 85);
+                                                },
+                                                child: Container(
                                                   width: 20,
+                                                  height: 20,
+                                                  padding: EdgeInsets.all(5),
+                                                  decoration: BoxDecoration(
+                                                      color: Colors.white,
+                                                      border: Border.all(
+                                                          color: Colors.black),
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              50)),
+                                                  child: Image.network(
+                                                    'https://img.icons8.com/ios-glyphs/480/camera--v1.png',
+                                                    filterQuality:
+                                                        FilterQuality.medium,
+                                                    width: 20,
+                                                  ),
                                                 ),
-                                              ),
-                                            );
-                                          },
-                                          fit: BoxFit.fitWidth,
-                                        ),
-                                      )),
+                                              );
+                                            },
+                                            loadingBuilder:
+                                                (context, error, stackTrace) {
+                                              return GestureDetector(
+                                                onTap: () {
+                                                  _onImageButtonPressed(
+                                                      ImageSource.camera,
+                                                      widget.Data[index]
+                                                              ["child_iin"]
+                                                          .toString(),
+                                                      context: context,
+                                                      imageQuality: 85);
+                                                },
+                                                child: ClipRRect(
+                                                  borderRadius:
+                                                  BorderRadius.circular(8.0),
+                                                  child: Container(
+                                                    width: 20,
+                                                    height: 20,
+                                                    padding: EdgeInsets.all(5),
+                                                    decoration: BoxDecoration(
+                                                        color: Colors.white,
+                                                        border: Border.all(
+                                                            color: Colors.black),
+                                                        borderRadius:
+                                                            BorderRadius.circular(
+                                                                100)),
+                                                    child: Image.network(
+                                                      'https://i.gifer.com/origin/d3/d3f472b06590a25cb4372ff289d81711_w200.gif',
+                                                      filterQuality:
+                                                          FilterQuality.medium,
+                                                      width: 20,
+                                                    ),
+                                                  ),
+                                                ),
+                                              );
+                                            },
+                                          )
+                                          // child: FadeInImage(
+                                          //
+                                          //   image: NetworkImage(
+                                          //     "https://fas.qazna24.kz/static/students/${widget.orgId}/${widget.groupId}/${widget.Data[index]["child_iin"]}.png",
+                                          //   ),
+                                          //   placeholder: const NetworkImage(
+                                          //     "https://i.gifer.com/origin/d3/d3f472b06590a25cb4372ff289d81711_w200.gif",
+                                          //   ),
+                                          //
+                                          //   imageErrorBuilder:
+                                          //       (context, error, stackTrace) {
+                                          //     return GestureDetector(
+                                          //       onTap: () {
+                                          //         _onImageButtonPressed(
+                                          //             ImageSource.camera,
+                                          //             widget.Data[index]
+                                          //                     ["child_iin"]
+                                          //                 .toString(),
+                                          //             context: context,
+                                          //             imageQuality: 85);
+                                          //       },
+                                          //       child: Container(
+                                          //         width: 20,
+                                          //         height: 20,
+                                          //         padding: EdgeInsets.all(5),
+                                          //         decoration: BoxDecoration(
+                                          //             color: Colors.white,
+                                          //             border: Border.all(
+                                          //                 color: Colors.black),
+                                          //             borderRadius:
+                                          //                 BorderRadius.circular(
+                                          //                     50)),
+                                          //         child: Image.network(
+                                          //           'https://img.icons8.com/ios-glyphs/480/camera--v1.png',
+                                          //           filterQuality:
+                                          //               FilterQuality.medium,
+                                          //           width: 20,
+                                          //         ),
+                                          //       ),
+                                          //     );
+                                          //   },
+                                          //   fit: BoxFit.fitWidth,
+                                          // ),
+                                          )),
+                                  GestureDetector(
+                                    onTap: () {
+                                      _onImageButtonPressed(
+                                          ImageSource.camera,
+                                          widget.Data[index]["child_iin"]
+                                              .toString(),
+                                          context: context,
+                                          imageQuality: 85);
+                                    },
+                                    child: Container(
+                                        margin: const EdgeInsets.fromLTRB(
+                                            0, 0, 15, 0),
+                                        width: 20,
+                                        height: 20,
+                                        decoration: BoxDecoration(
+                                            color: Colors.blueAccent,
+                                            border: Border.all(
+                                                color: Colors.blueAccent),
+                                            borderRadius:
+                                                BorderRadius.circular(50)),
+                                        child: Icon(Icons.edit,
+                                            size: 13, color: Colors.white)),
+                                  ),
                                   Expanded(
                                     child: Column(
                                       crossAxisAlignment:

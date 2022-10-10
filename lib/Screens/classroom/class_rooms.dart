@@ -22,6 +22,7 @@ class _ClassRoomsState extends State<ClassRooms> {
     // {"title": "Class 12", "sub_title": "Chemistry 1ST", "suc": "12", "ap": "3"},
     // {"title": "Class 11", "sub_title": "Chemistry 2ND", "suc": "22", "ap": "12"}
   ];
+  var orgId = "";
 
   @override
   void initState() {
@@ -53,6 +54,7 @@ class _ClassRoomsState extends State<ClassRooms> {
       // var jsonMap = json.decode(response.data);
       // data = jsonMap[0]["group_mass"];
       data = response.data[0]["group_mass"];
+      orgId = response.data[0]["org_ID"].toString();
       setState(() {});
     } else {
       // print(jsonMap);
@@ -80,6 +82,8 @@ class _ClassRoomsState extends State<ClassRooms> {
                                 MaterialPageRoute(
                                   builder: (BuildContext context) =>
                                       StudentList(
+                                        orgId: orgId,
+                                          groupId: data[index]["group_ID"].toString(),
                                           callRefresh: () {
                                             getDataa();
                                           },
